@@ -1,0 +1,26 @@
+--- #################### 注册中心相关配置 ####################
+
+spring:
+  cloud:
+    nacos:
+      server-addr: 10.19.28.106:8848
+      username: nacos
+      password: AuditNacos@112220
+      discovery:
+        namespace: 86a116de-c450-4bab-8b4b-c98147354d77 # 命名空间。这里使用 dev 开发环境
+        group: test # 使用的 Nacos 注册中心的分组，默认为 DEFAULT_GROUP
+
+--- #################### 配置中心相关配置 ####################
+
+spring:
+  cloud:
+    nacos:
+      # Nacos Config 配置项，对应 NacosConfigProperties 配置属性类
+      config:
+        server-addr: 10.19.28.106:8848 # Nacos 服务器地址
+        namespace: 86a116de-c450-4bab-8b4b-c98147354d77 # 命名空间。这里使用 dev 开发环境
+        username: nacos
+        password: AuditNacos@112220
+        group: test # 使用的 Nacos 配置分组，默认为 DEFAULT_GROUP
+        name: # 使用的 Nacos 配置集的 dataId，默认为 spring.application.name
+        file-extension: yaml # 使用的 Nacos 配置集的 dataId 的文件拓展名，同时也是 Nacos 配置集的配置格式，默认为 properties

@@ -1,0 +1,4 @@
+### 请求 /digital/redis/get-monitor-info 接口 => 成功
+GET {{baseUrl}}/digital/redis/get-monitor-info
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenentId}}

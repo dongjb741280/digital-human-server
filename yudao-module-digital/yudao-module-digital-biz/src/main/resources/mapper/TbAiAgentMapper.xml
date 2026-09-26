@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.iocoder.yudao.module.digital.dal.mysql.AiAgentMapper">
+    <select id="selectListAll" resultType="cn.iocoder.yudao.module.digital.dal.AiAgentDO">
+        select * from tb_ai_dh_copywrite_agent
+    </select>
+
+    <select id="getDialogueWorkflowDelTask" resultType="map">
+        select
+            t.task_id,
+            t.task_name,
+            t.task_state,
+            t.task_node,
+            t.remark
+        from
+            tb_ai_workflow_work_task t
+        where
+            not exists (
+                select
+                    task_id
+                from
+                    tb_ai_workflow_order_info s
+                where
+                    t.task_id = s.task_id
+            )
+            <if test="taskId != null and taskId != ''">
+                AND t.task_id = #{taskId}
+            </if>
+
+    </select>
+</mapper>

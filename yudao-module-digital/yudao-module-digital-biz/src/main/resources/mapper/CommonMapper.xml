@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.iocoder.yudao.module.digital.dal.mysql.CommonMapper">
+
+    <select id="getPptRecordDetail" resultType="map">
+        SELECT *
+        FROM tb_ai_dh_copywrite_ppt_record_detail
+        WHERE ppt_id = #{mainPptId}
+        <if test="pptNum != null and pptNum != ''">
+            AND ppt_num = #{pptNum}
+        </if>
+        <if test="pptBatch != null and pptBatch != ''">
+            AND ppt_batch = #{pptBatch}
+        </if>
+        ORDER BY ppt_num
+    </select>
+
+    <update id="updatePptRecordDetail" parameterType="java.util.Map">
+        update tb_ai_dh_copywrite_ppt_record_detail
+        set ppt_image_words = #{pptImageWords}
+        where ppt_id = #{pptId}
+          and ppt_num = #{pptNum}
+    </update>
+
+
+    <update id="updatePptRecordUrlAndLength" parameterType="java.util.Map">
+        update tb_ai_dh_copywrite_ppt_record_detail
+        set ppt_voice_url = #{pptVoiceUrl},
+            ppt_voice_length = #{length}
+        where ppt_id = #{pptId}
+        and ppt_num = #{pptNum}
+    </update>
+
+
+
+
+    <select id="getVideoExecLog" resultType="map">
+        SELECT *
+        FROM tb_ai_dh_video_exec_log
+        WHERE 1 = 1
+
+        <if test="modelType != null and modelType != ''">
+            AND model_type = #{modelType}
+        </if>
+
+        <if test="batchNum != null and batchNum != ''">
+            AND batch_num = #{batchNum}
+        </if>
+
+        <if test="modelId != null and modelId != ''">
+            AND model_id = #{modelId}
+        </if>
+
+        <if test="modelNum != null and modelNum != ''">
+            AND model_num = #{modelNum}
+        </if>
+
+        <if test="videoId != null and videoId != ''">
+            AND video_id = #{videoId}
+        </if>
+
+        <if test="execOrder != null and execOrder != ''">
+            AND exec_order = #{execOrder}
+        </if>
+
+        <if test="execStatus != null and execStatus != ''">
+            AND exec_status = #{execStatus}
+        </if>
+
+        order by CAST(model_num AS signed ) asc
+    </select>
+
+
+    <select id="getvideoExecLogDetail" resultType="map">
+
+        SELECT *
+        FROM tb_ai_dh_video_exec_log
+        WHERE 1 = 1
+          AND batch_num = #{batchNum}
+          AND video_id = #{videoId}
+          AND exec_status = ''
+        order by exec_order asc
+    </select>
+
+    <select id="getExecHumanAddImageNum" parameterType="java.util.Map">
+        SELECT count(1)
+        FROM tb_ai_dh_video_exec_log
+        WHERE 1 = 1
+          AND batch_num = #{batchNum}
+          AND video_id = #{videoId}
+          AND model_type = #{modelType}
+          AND exec_status = '3'
+    </select>
+
+    <select id="getNotExecHumanAddImageNum" parameterType="java.util.Map">
+        SELECT *
+        FROM tb_ai_dh_video_exec_log
+        WHERE 1 = 1
+          AND batch_num = #{batchNum}
+          AND video_id = #{videoId}
+          AND model_type = #{modelType}
+          AND exec_status = ''
+    </select>
+
+
+
+    <update id="updateRecordVoiceHumanUrl" parameterType="java.util.Map">
+        update tb_ai_dh_copywrite_ppt_record_detail
+        set ppt_voice_human_url = #{voiceAddVideoOutPutDir}
+        where ppt_id = #{pptId}
+          and ppt_num = #{pptNum}
+    </update>
+
+    <update id="updateRecordVoiceUrl" parameterType="java.util.Map">
+        update tb_ai_dh_copywrite_ppt_record_detail
+        set ppt_voice_url = #{voiceSampleUrl},ppt_voice_length = #{length}
+        where ppt_id = #{pptId}
+          and ppt_num = #{pptNum}
+    </update>
+
+
+
+    <update id="updateRecordVideoImageUrl" parameterType="java.util.Map">
+        update tb_ai_dh_copywrite_ppt_record_detail
+        set ppt_video_image_url = #{videoOutPath}
+        where ppt_id = #{pptId}
+          and ppt_num = #{pptNum}
+    </update>
+
+    <update id="updateVoiceSplitHumanPath" parameterType="java.util.Map">
+        update tb_ai_dh_copywrite_ppt_record_detail
+        set ppt_voice_split_human_url = #{voicesplithumanPath}
+        where ppt_id = #{pptId}
+          and ppt_num = #{pptNum}
+    </update>
+
+
+
+    <update id="updatemergeVideoUrl" parameterType="java.util.Map">
+        update tb_ai_dh_video
+        set merge_video_url = #{mergeVideoOutPutDir}
+        where id = #{videoId}
+    </update>
+
+    <update id="updatemergeAdjustVideoUrl" parameterType="java.util.Map">
+        update tb_ai_dh_video
+        set merge_video_adjust_url = #{videoOutPath}
+        where id = #{videoId}
+    </update>
+
+
+    <update id="updateVideoUrl" parameterType="java.util.Map">
+
+        update tb_ai_dh_video
+        set video_url = #{videoOutPath},
+            video_final_name = #{videoFinalName}
+        where id = #{videoId}
+    </update>
+
+    <update id="updateMakeVideoStatus" parameterType="java.util.Map">
+        update tb_ai_dh_video
+        set video_status = #{videoStatus}
+        where id = #{id}
+    </update>
+
+    <update id="updateVideoFirstFrame" parameterType="java.util.Map">
+        update tb_ai_dh_video
+        set first_frame = #{firstFrame}
+        where id = #{videoId}
+    </update>
+
+
+
+
+    <insert id="insertVideoExecLog" parameterType="java.util.Map">
+        insert into tb_ai_dh_video_exec_log (
+            batch_num,
+            model_id,
+            model_num,
+            model_type,
+            exec_status,
+            video_id,
+            exec_order)
+        VALUES (
+                   #{batchNum},
+                   #{modelId},
+                   #{modelNum},
+                   #{modelType},
+                   #{execStatus},
+                   #{videoId},
+                   #{execOrder}
+               )
+    </insert>
+
+    <insert id="insertPptRecordDetail" parameterType="java.util.Map">
+        insert into tb_ai_dh_copywrite_ppt_record_detail (
+            ppt_id,
+            ppt_num,
+            ppt_image_url,
+            ppt_image_words,
+            ppt_voice_url,
+            ppt_voice_length,
+            ppt_voice_human_url,
+            ppt_video_image_url,
+            opr_time,
+            opr_staff)
+        VALUES (
+                   #{pptId},
+                   #{pptNum},
+                   #{pptImageUrl},
+                   #{pptImageWords},
+                   #{pptVoiceUrl},
+                   #{pptVoiceLength},
+                   #{pptVoiceHumanUrl},
+                   #{pptVideoImageUrl},
+                   #{oprTime},
+                   #{oprStaff}
+               )
+    </insert>
+
+    <select id="getAiDhHumanVideoDetail" resultType="map">
+        SELECT *
+        FROM tb_ai_dh_video
+        where id = #{videoId}
+    </select>
+
+    <select id="getFirstPptImage" resultType="map">
+
+        SELECT *
+        FROM tb_ai_dh_copywrite_ppt_record_detail
+        WHERE ppt_id = #{pptId}
+          and ppt_num = '0'
+
+    </select>
+
+    <select id="getAiImageAndVideoUrl" resultType="map">
+        SELECT * FROM tb_ai_image_and_video_url_temp
+    </select>
+
+    <update id="updateVideoExecLog" parameterType="java.util.Map">
+        update tb_ai_dh_video_exec_log
+        <set>
+
+            <if test="execStatus != null and execStatus != ''">
+                exec_status = #{execStatus},
+            </if>
+
+            <if test="pptVoiceUrl != null and pptVoiceUrl != ''">
+                ppt_voice_url = #{pptVoiceUrl},
+            </if>
+
+            <if test="length != null and length != ''">
+                ppt_voice_length = #{length},
+            </if>
+
+            <if test="pptVoiceHumanUrl != null and pptVoiceHumanUrl != ''">
+                ppt_voice_human_url = #{pptVoiceHumanUrl},
+            </if>
+
+            <if test="videoImageOutPath != null and videoOutPath != ''">
+                ppt_video_image_url = #{videoOutPath},
+            </if>
+
+            <if test="mergeVideoOutPutDir != null and mergeVideoOutPutDir != ''">
+                merge_video_url = #{mergeVideoOutPutDir},
+            </if>
+
+            <if test="tmpFinalVideoUrl != null and tmpFinalVideoUrl != ''">
+                tmp_final_video_url = #{tmpFinalVideoUrl},
+            </if>
+
+            <if test="adjustVideoOutPutDir != null and adjustVideoOutPutDir != ''">
+                merge_video_adjust_url = #{adjustVideoOutPutDir},
+            </if>
+
+            <if test="videoAddcaptionsUrl != null and videoAddcaptionsUrl != ''">
+                merge_video_addcaptions_url = #{videoAddcaptionsUrl},
+            </if>
+
+            <if test="firstFrameOutPathAllPath != null and firstFrameOutPathAllPath != ''">
+                first_frame_url = #{firstFrameOutPathAllPath},
+            </if>
+
+            <if test="voicesplithumanPath != null and voicesplithumanPath != ''">
+                ppt_voice_split_human_url = #{voicesplithumanPath},
+            </if>
+            update_time = now()
+        </set>
+        where 1 = 1
+
+        <if test="modelType != null and modelType != ''">
+            AND model_type = #{modelType}
+        </if>
+
+        <if test="batchNum != null and batchNum != ''">
+            AND batch_num = #{batchNum}
+        </if>
+
+        <if test="modelId != null and modelId != ''">
+            AND model_id = #{modelId}
+        </if>
+
+        <if test="modelNum != null and modelNum != ''">
+            AND model_num = #{modelNum}
+        </if>
+
+        <if test="videoId != null and videoId != ''">
+            AND video_id = #{videoId}
+        </if>
+
+        <if test="execOrder != null and execOrder != ''">
+            AND exec_order = #{execOrder}
+        </if>
+
+    </update>
+
+    <select id="getOrgChangeField" resultType="map">
+
+        SELECT
+            org_field "orgField",
+            change_field "changeField"
+        FROM tb_ai_dh_voice2txt_field
+        WHERE  1 = 1
+
+    </select>
+
+
+    <select id="getCommonParam" resultType="map">
+        SELECT
+            param_key "paramKey",
+            param_value "paramValue"
+        FROM tb_ai_dh_common_param
+        WHERE  1 = 1
+        <if test="paramKey != null and paramKey != ''">
+            AND param_key = #{paramKey}
+        </if>
+
+    </select>
+
+    <delete id="deleteVideoExecLog" parameterType="java.util.Map">
+        delete from tb_ai_dh_video_exec_log
+        where video_id = #{videoId}
+    </delete>
+
+</mapper>
