@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>灵犀数字人 · 一键打造你的 AI 数字人</title>
+  <meta name="description" content="灵犀数字人平台,提供数字人形象复刻、声音复刻、文案创作、视频创作与 AI 实时互动能力。上传一段视频即可复刻专属数字分身,让数字人替你出镜、讲解、直播、互动。" />
+  <meta property="og:title" content="灵犀数字人 · 一键打造你的 AI 数字人" />
+  <meta property="og:description" content="形象复刻 · 声音复刻 · 文案创作 · 视频合成,全栈自研 AI 数字人平台。" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='12' r='4.5' fill='white'/%3E%3Cpath d='M8 26c1.5-4.5 4.4-6.5 8-6.5s6.5 2 8 6.5' fill='white'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <header class="nav" id="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="26" height="26"><defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect width="32" height="32" rx="8" fill="url(#bm)"/><circle cx="16" cy="12" r="4.5" fill="#fff"/><path d="M8 26c1.5-4.5 4.4-6.5 8-6.5s6.5 2 8 6.5" fill="#fff"/></svg>
+        </span>
+        <span class="brand-name">灵犀数字人</span>
+      </a>
+      <nav class="nav-links" id="navLinks">
+        <a href="#features">核心能力</a>
+        <a href="#workflow">创作流程</a>
+        <a href="#scenarios">应用场景</a>
+        <a href="#tech">技术优势</a>
+        <a class="nav-cta" href="#cta">免费试用</a>
+      </nav>
+      <button class="nav-toggle" id="navToggle" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-glow hero-glow-a" aria-hidden="true"></div>
+      <div class="hero-glow hero-glow-b" aria-hidden="true"></div>
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <span class="badge"><span class="badge-dot"></span> 全栈自研 · AI 数字人平台</span>
+          <h1>一键打造你的<br /><span class="grad-text">AI 数字人</span></h1>
+          <p class="hero-sub">上传一段视频即可复刻专属数字分身,搭配声音复刻与文案生成,让数字人替你出镜、讲解、直播、实时互动。</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#cta">免费开始创作</a>
+            <a class="btn btn-ghost" href="#features">查看核心能力</a>
+          </div>
+          <ul class="hero-points">
+            <li><svg viewBox="0 0 20 20" width="16" height="16"><path d="M3 11l4.5 4.5L17 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 形象复刻</li>
+            <li><svg viewBox="0 0 20 20" width="16" height="16"><path d="M3 11l4.5 4.5L17 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 声音复刻</li>
+            <li><svg viewBox="0 0 20 20" width="16" height="16"><path d="M3 11l4.5 4.5L17 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 视频合成</li>
+            <li><svg viewBox="0 0 20 20" width="16" height="16"><path d="M3 11l4.5 4.5L17 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 实时互动</li>
+          </ul>
+        </div>
+        <div class="hero-visual">
+          <div class="console" aria-hidden="true">
+            <div class="console-bar">
+              <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+              <span class="console-title">数字人视频创作</span>
+            </div>
+            <div class="console-body">
+              <div class="console-preview">
+                <svg class="avatar" viewBox="0 0 200 200">
+                  <defs>
+                    <linearGradient id="av" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#818cf8"/><stop offset="1" stop-color="#22d3ee"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="100" cy="100" r="92" fill="url(#av)" opacity="0.18"/>
+                  <circle cx="100" cy="100" r="92" fill="none" stroke="url(#av)" stroke-width="2" opacity="0.5"/>
+                  <circle cx="100" cy="80" r="30" fill="url(#av)"/>
+                  <path d="M46 176c6-36 26-54 54-54s48 18 54 54" fill="url(#av)"/>
+                </svg>
+                <div class="console-badge">
+                  <span class="pulse"></span> 生成中 78%
+                </div>
+                <div class="wave">
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <div class="console-timeline">
+                <span class="seg seg-done"></span><span class="seg seg-done"></span><span class="seg seg-done"></span><span class="seg seg-active"></span><span class="seg"></span><span class="seg"></span>
+              </div>
+              <div class="console-steps">
+                <div class="step done"><i>1</i>形象复刻</div>
+                <div class="step done"><i>2</i>文案配音</div>
+                <div class="step active"><i>3</i>口型合成</div>
+                <div class="step"><i>4</i>视频合成</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 能力亮点条 -->
+    <section class="stats">
+      <div class="container stats-inner">
+        <div class="stat"><span class="stat-num">1:1</span><span class="stat-label">形象高保真复刻</span></div>
+        <div class="stat"><span class="stat-num">零样本</span><span class="stat-label">声音克隆</span></div>
+        <div class="stat"><span class="stat-num">7 步</span><span class="stat-label">全自动视频流水线</span></div>
+        <div class="stat"><span class="stat-num">SSE</span><span class="stat-label">实时流式互动</span></div>
+      </div>
+    </section>
+
+    <!-- 核心能力 -->
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">核心能力</span>
+          <h2>一站式数字人生产流水线</h2>
+          <p class="section-sub">从形象、声音到文案、视频,再到实时互动,覆盖数字人内容生产的完整链路。</p>
+        </div>
+        <div class="grid grid-3">
+          <article class="card">
+            <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z"/><path d="M4 21c1.4-4 4.3-6 8-6s6.6 2 8 6"/></svg></div>
+            <h3>形象复刻</h3>
+            <p>上传训练视频,自动抠图抠像,生成透明 PNG 与绿幕视频,1:1 复刻专属数字分身。</p>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></div>
+            <h3>声音复刻</h3>
+            <p>基于 GPT-SoVITS 的 zero-shot 零样本声音克隆,少量音频即可复刻自然逼真的音色。</p>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></div>
+            <h3>文案创作</h3>
+            <p>LLM 智能生成提纲、正文与 PPT,配合 python-pptx 与 Pillow 一键排版出图。</p>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M10 4v5"/><path d="m10 15 3 2 4-4"/></svg></div>
+            <h3>视频创作</h3>
+            <p>7 步流水线:TTS → 裁剪分段 → 口型合成 → 图层合成 → 合并 → 首帧 → 字幕,全自动出片。</p>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+            <h3>素材管理</h3>
+            <p>背景图、背景视频、前景装饰等图层素材库,灵活搭配,快速复用。</p>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.5"/></svg></div>
+            <h3>实时互动</h3>
+            <p>AI 智能体、话术对练、流程编排,支持 SSE 流式对话,打造数字导购、虚拟讲师。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 创作流程 -->
+    <section class="section section-alt" id="workflow">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">创作流程</span>
+          <h2>三步,让数字人开始工作</h2>
+          <p class="section-sub">无需专业拍摄与剪辑,上传素材后由异步流水线自动完成从形象到成片的全部工序。</p>
+        </div>
+        <div class="workflow">
+          <div class="wf-step">
+            <span class="wf-num">01</span>
+            <h3>上传素材</h3>
+            <p>上传一段真人视频或音频,作为形象与声音的训练样本。</p>
+          </div>
+          <div class="wf-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          <div class="wf-step">
+            <span class="wf-num">02</span>
+            <h3>复刻形象与声音</h3>
+            <p>AI 自动抠像、克隆音色,生成高保真的数字分身与专属音色。</p>
+          </div>
+          <div class="wf-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          <div class="wf-step">
+            <span class="wf-num">03</span>
+            <h3>生成文案并出片</h3>
+            <p>LLM 生成文案,流水线自动配音、对口型、合成视频,一键导出成片。</p>
+          </div>
+        </div>
+        <div class="pipeline">
+          <div class="pipe-track">
+            <span>上传训练视频</span><span>rembg 抠像</span><span>GPT-SoVITS TTS</span><span>Wav2Lip 口型</span><span>图层合成</span><span>字幕 / 首帧</span><span>导出成片</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 应用场景 -->
+    <section class="section" id="scenarios">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">应用场景</span>
+          <h2>让数字人出现在每一个镜头前</h2>
+          <p class="section-sub">覆盖直播、短视频、客服与教育等多个高频内容场景。</p>
+        </div>
+        <div class="grid grid-2">
+          <article class="scenario">
+            <div class="scenario-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="11" rx="2"/><path d="M17 10l4-3v10l-4-3"/></svg></div>
+            <div>
+              <h3>数字人直播</h3>
+              <p>7×24 小时不间断直播带货,降低真人成本,标准化话术脚本,加速成交转化。</p>
+            </div>
+          </article>
+          <article class="scenario">
+            <div class="scenario-icon"><svg viewBox="0 0 24 24"><path d="M3 7l4-3 4 3 4-3 4 3v11l-4 3-4-3-4 3-4-3Z"/><path d="M7 4v11M15 4v11M7 15l4 3 4-3"/></svg></div>
+            <div>
+              <h3>短视频批量生产</h3>
+              <p>一份文案即可批量生成口播短视频,显著降低拍摄与制作成本。</p>
+            </div>
+          </article>
+          <article class="scenario">
+            <div class="scenario-icon"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 0 1 15-5Z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg></div>
+            <div>
+              <h3>数字客服 / 导购</h3>
+              <p>实时互动数字员工,大模型驱动对话,打造智能客服与数字导购。</p>
+            </div>
+          </article>
+          <article class="scenario">
+            <div class="scenario-icon"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h13v14H8"/><path d="M4 19a2 2 0 0 0 2 2h13M8 19v3"/></svg></div>
+            <div>
+              <h3>虚拟讲师 / 教育</h3>
+              <p>PPT 一键生成讲解视频,数字人讲师全天候授课,让知识触手可及。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 技术优势 -->
+    <section class="section section-dark" id="tech">
+      <div class="container">
+        <div class="section-head head-light">
+          <span class="eyebrow">技术优势</span>
+          <h2>全栈自研,稳定可扩展</h2>
+          <p class="section-sub">从 AI 推理引擎到业务编排,微服务架构支撑大规模内容生产。</p>
+        </div>
+        <div class="grid grid-3 tech-grid">
+          <div class="tech-item">
+            <h3>全栈 AI 算法</h3>
+            <p>集成 GPT-SoVITS 语音合成、Wav2Lip / MuseTalk 口型合成、rembg 抠像与 LLM 文案,核心推理自研可控。</p>
+          </div>
+          <div class="tech-item">
+            <h3>微服务架构</h3>
+            <p>基于 Spring Cloud 的网关、系统、基础设施、数字人业务四服务,高可用、易扩展、易运维。</p>
+          </div>
+          <div class="tech-item">
+            <h3>异步回调流水线</h3>
+            <p>回调驱动的异步任务编排,解耦 AI 推理与业务落库,弹性伸缩、稳定可靠。</p>
+          </div>
+          <div class="tech-item">
+            <h3>对象存储</h3>
+            <p>MinIO 统一管理形象、声音、素材与成片,元数据落库,素材安全可追溯。</p>
+          </div>
+          <div class="tech-item">
+            <h3>流式实时互动</h3>
+            <p>SSE 流式对话,低延迟响应,支持数字人实时交互与话术对练。</p>
+          </div>
+          <div class="tech-item">
+            <h3>开放 API</h3>
+            <p>标准 REST 接口与网关鉴权,能力可被轻松集成到你的业务系统。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section cta" id="cta">
+      <div class="container">
+        <div class="cta-box">
+          <h2>准备好打造你的 AI 数字人了吗?</h2>
+          <p>上传一段视频,几分钟即可复刻专属数字分身,开启 7×24 小时的内容生产。</p>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="https://github.com/dongjb741280/digital-human-server" target="_blank" rel="noopener">查看源码与文档</a>
+            <a class="btn btn-ghost-dark" href="#top">了解更多</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a class="brand" href="#top">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="24" height="24"><defs><linearGradient id="fm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect width="32" height="32" rx="8" fill="url(#fm)"/><circle cx="16" cy="12" r="4.5" fill="#fff"/><path d="M8 26c1.5-4.5 4.4-6.5 8-6.5s6.5 2 8 6.5" fill="#fff"/></svg>
+          </span>
+          <span class="brand-name">灵犀数字人</span>
+        </a>
+        <p>全栈自研的 AI 数字人平台,让数字人替你出镜、讲解、直播与互动。</p>
+      </div>
+      <div class="footer-col">
+        <h4>产品</h4>
+        <a href="#features">核心能力</a>
+        <a href="#workflow">创作流程</a>
+        <a href="#scenarios">应用场景</a>
+        <a href="#tech">技术优势</a>
+      </div>
+      <div class="footer-col">
+        <h4>资源</h4>
+        <a href="https://github.com/dongjb741280/digital-human-server" target="_blank" rel="noopener">GitHub 仓库</a>
+        <a href="https://github.com/dongjb741280/digital-human-server/blob/main/README.md" target="_blank" rel="noopener">项目文档</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© <span id="year"></span> 灵犀数字人 · 基于 digital-human-server 构建</span>
+      <span>Power by AI Digital Human Platform</span>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
