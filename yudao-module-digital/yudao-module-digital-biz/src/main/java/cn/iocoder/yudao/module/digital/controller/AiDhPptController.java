@@ -160,6 +160,44 @@ public class AiDhPptController {
     }
 
     /**
+     * 保存 PPT 编辑结果（每页 fabric 画布 JSON）
+     */
+    @PostMapping("/save_ppt_edit")
+    @Operation(summary = "保存ppt编辑结果")
+    public CommonResult<Boolean> savePptEdit(@RequestBody JSONObject reqParam) {
+        try {
+            JSONObject result = aiDhPptService.savePptEdit(reqParam);
+            if (result != null && "0000".equals(result.getString("code"))) {
+                return success(true);
+            }
+            return CommonResult.error(GlobalErrorCodeConstants.UNKNOWN.getCode(),
+                    result != null ? result.getString("msg") : "保存失败");
+        } catch (Exception e) {
+            log.info("调用 savePptEdit error：" + e.getMessage());
+            return error(GlobalErrorCodeConstants.UNKNOWN);
+        }
+    }
+
+    /**
+     * 按编辑后的 fabric 画布 JSON 重新生成 .pptx
+     */
+    @PostMapping("/regenerate_ppt")
+    @Operation(summary = "重新生成pptx")
+    public CommonResult<JSONObject> regeneratePpt(@RequestBody JSONObject reqParam) {
+        try {
+            JSONObject result = aiDhPptService.regeneratePpt(reqParam);
+            if (result != null && "0000".equals(result.getString("code"))) {
+                return success(result.getJSONObject("data"));
+            }
+            return CommonResult.error(GlobalErrorCodeConstants.UNKNOWN.getCode(),
+                    result != null ? result.getString("msg") : "重新生成失败");
+        } catch (Exception e) {
+            log.info("调用 regeneratePpt error：" + e.getMessage());
+            return error(GlobalErrorCodeConstants.UNKNOWN);
+        }
+    }
+
+    /**
      * @autor: llj
      * @time: 2024/7/22
      * @description: 大纲生成接口

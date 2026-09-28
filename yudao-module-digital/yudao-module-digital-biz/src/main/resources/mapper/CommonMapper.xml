@@ -23,6 +23,19 @@
           and ppt_num = #{pptNum}
     </update>
 
+    <update id="updatePptSlideContent" parameterType="java.util.Map">
+        update tb_ai_dh_copywrite_ppt_record_detail
+        set ppt_slide_content = #{pptSlideContent}
+        where ppt_id = #{pptId}
+          and ppt_num = #{pptNum}
+    </update>
+
+    <update id="updatePptRecordUrl" parameterType="java.util.Map">
+        update tb_ai_dh_copywrite_ppt_record
+        set ppt_url = #{pptUrl}
+        where id = #{pptId}
+    </update>
+
 
     <update id="updatePptRecordUrlAndLength" parameterType="java.util.Map">
         update tb_ai_dh_copywrite_ppt_record_detail
@@ -199,6 +212,7 @@
             ppt_num,
             ppt_image_url,
             ppt_image_words,
+            ppt_slide_content,
             ppt_voice_url,
             ppt_voice_length,
             ppt_voice_human_url,
@@ -210,6 +224,7 @@
                    #{pptNum},
                    #{pptImageUrl},
                    #{pptImageWords},
+                   #{pptSlideContent},
                    #{pptVoiceUrl},
                    #{pptVoiceLength},
                    #{pptVoiceHumanUrl},

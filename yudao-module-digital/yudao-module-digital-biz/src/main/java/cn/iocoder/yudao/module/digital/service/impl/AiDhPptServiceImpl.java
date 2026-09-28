@@ -121,6 +121,7 @@ public class AiDhPptServiceImpl implements AiDhPptService {
 
         String copywriteId = null;
         String pptId = null;
+        JSONArray slides = null;
 
         JSONObject getPpt = callPythonService.callToPPtPythonPost(jsonObject,interName);
         log.info("调用python接口返回结果：" + getPpt);
@@ -131,7 +132,7 @@ public class AiDhPptServiceImpl implements AiDhPptService {
                 String recordDesc = data.getString("recordDesc");
                 JSONArray images = data.getJSONArray("images");
                 JSONObject notesMap = data.getJSONObject("notesMap");
-                JSONArray slides = data.getJSONArray("slides");
+                slides = data.getJSONArray("slides");
                 // 落文案主表 + PPT 记录（明细表里的 pptId 用 PPT 记录 id）
                 String copywriteContent = jsonObject.getString("text") != null ? jsonObject.getString("text") : jsonObject.getString("content");
                 copywriteId = copywritingManagementService.copywritingCreate(jsonObject.getString("doc_name"), jsonObject.getString("title"), copywriteContent, oprStaffId);
@@ -146,6 +147,7 @@ public class AiDhPptServiceImpl implements AiDhPptService {
                         params.put("pptNum",i);
                         params.put("pptImageUrl",imageUrl);
                         params.put("pptImageWords",notesMapString);
+                        params.put("pptSlideContent", slides != null && i < slides.size() ? slides.getJSONObject(i).toJSONString() : "");
                         params.put("pptVoiceUrl","");
                         params.put("pptVoiceLength","");
                         params.put("pptVoiceHumanUrl","");
@@ -183,7 +185,53 @@ public class AiDhPptServiceImpl implements AiDhPptService {
         JSONObject data = new JSONObject();
         data.put("pptId", pptId);
         data.put("copywriteId", copywriteId);
+        data.put("slides", slides);
         result.put("data", data);
+        return result;
+    }
+    @Override
+    public JSONObject savePptEdit(JSONObject jsonObject) throws Exception {
+        String pptId = jsonObject.getString("pptId");
+        JSONArray slides = jsonObject.getJSONArray("slides");
+        if (slides != null) {
+            for (int i = 0; i < slides.size(); i++) {
+                JSONObject s = slides.getJSONObject(i);
+                Map<String, Object> params = new HashMap<>();
+                params.put("pptId", pptId);
+                params.put("pptNum", s.getInteger("pptNum"));
+                params.put("pptSlideContent", s.getString("content"));
+                commonMapper.updatePptSlideContent(params);
+            }
+        }
+        JSONObject result = new JSONObject();
+        result.put("code", "0000");
+        result.put("msg", "保存成功");
+        return result;
+    }
+    @Override
+    public JSONObject regeneratePpt(JSONObject jsonObject) throws Exception {
+        String pptRecordId = jsonObject.getString("pptId");
+        String templateId = jsonObject.getString("templateId");
+        JSONObject pyReq = new JSONObject();
+        pyReq.put("title", jsonObject.getString("title"));
+        pyReq.put("slides", jsonObject.getJSONArray("slides"));
+        pyReq.put("pptId", templateId);
+        JSONObject getPpt = callPythonService.callToPPtPythonPost(pyReq, "/regenerate_ppt");
+        if (getPpt == null || !"0000".equals(getPpt.getString("code"))) {
+            JSONObject errorResult = new JSONObject();
+            errorResult.put("code", "9999");
+            errorResult.put("msg", getPpt != null ? getPpt.getString("msg") : "PPT重新生成服务无响应");
+            return errorResult;
+        }
+        String pptUrl = getPpt.getJSONObject("data").getString("pptUrl");
+        Map<String, Object> urlParams = new HashMap<>();
+        urlParams.put("pptId", pptRecordId);
+        urlParams.put("pptUrl", pptUrl);
+        commonMapper.updatePptRecordUrl(urlParams);
+        JSONObject result = new JSONObject();
+        result.put("code", "0000");
+        result.put("msg", "重新生成成功");
+        result.put("data", getPpt.getJSONObject("data"));
         return result;
     }
     @Override

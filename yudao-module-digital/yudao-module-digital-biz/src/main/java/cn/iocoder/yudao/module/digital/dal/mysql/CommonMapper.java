@@ -15,6 +15,10 @@ public interface CommonMapper {
 
     public int updatePptRecordDetail(Map<String,Object> params);
 
+    public int updatePptSlideContent(Map<String,Object> params);
+
+    public int updatePptRecordUrl(Map<String,Object> params);
+
     public List<Map> getVideoExecLog (Map<String,Object> params);
 
 
