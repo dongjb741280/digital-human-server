@@ -119,6 +119,9 @@ public class AiDhPptServiceImpl implements AiDhPptService {
         String oprStaffId = jsonObject.getString("user");
         attachAgentRole(jsonObject);
 
+        String copywriteId = null;
+        String pptId = null;
+
         JSONObject getPpt = callPythonService.callToPPtPythonPost(jsonObject,interName);
         log.info("调用python接口返回结果：" + getPpt);
         if(getPpt != null){
@@ -128,10 +131,11 @@ public class AiDhPptServiceImpl implements AiDhPptService {
                 String recordDesc = data.getString("recordDesc");
                 JSONArray images = data.getJSONArray("images");
                 JSONObject notesMap = data.getJSONObject("notesMap");
+                JSONArray slides = data.getJSONArray("slides");
                 // 落文案主表 + PPT 记录（明细表里的 pptId 用 PPT 记录 id）
                 String copywriteContent = jsonObject.getString("text") != null ? jsonObject.getString("text") : jsonObject.getString("content");
-                String copywriteId = copywritingManagementService.copywritingCreate(jsonObject.getString("doc_name"), jsonObject.getString("title"), copywriteContent, oprStaffId);
-                String pptId = copywritingManagementService.copywritingCreatePPT(copywriteId, pptUrl, recordDesc, oprStaffId);
+                copywriteId = copywritingManagementService.copywritingCreate(jsonObject.getString("doc_name"), jsonObject.getString("title"), copywriteContent, oprStaffId);
+                pptId = copywritingManagementService.copywritingCreatePPT(copywriteId, pptUrl, recordDesc, oprStaffId);
                 //图片由 Python 侧渲染并上传，这里直接落明细表
                 try {
                     for (int i = 0; i < images.size(); i++) {
@@ -176,6 +180,10 @@ public class AiDhPptServiceImpl implements AiDhPptService {
         JSONObject result = new JSONObject();
         result.put("code", "0000");
         result.put("msg", "ppt生成pdf成功");
+        JSONObject data = new JSONObject();
+        data.put("pptId", pptId);
+        data.put("copywriteId", copywriteId);
+        result.put("data", data);
         return result;
     }
     @Override

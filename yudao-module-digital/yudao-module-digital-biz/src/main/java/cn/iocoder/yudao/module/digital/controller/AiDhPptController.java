@@ -140,8 +140,7 @@ public class AiDhPptController {
             if(result != null){
                 if("0000".equals(result.getString("code"))){
                     log.info("调用 generatePpt success：" + result);
-                    //JSONObject data = result.getJSONObject("data");
-                    JSONObject data = new JSONObject();
+                    JSONObject data = result.getJSONObject("data");
                     return success(data);
                 }else {
                     log.info("调用 generatePpt error：" + result);
