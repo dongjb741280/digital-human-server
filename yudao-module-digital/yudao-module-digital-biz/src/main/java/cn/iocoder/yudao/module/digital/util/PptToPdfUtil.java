@@ -21,14 +21,17 @@ public class PptToPdfUtil {
         String command;
         boolean flag;
         String osName = System.getProperty("os.name");
+        // 每次用独立 profile，避免与 GUI/并发实例抢锁导致 soffice 卡死（历史 120s 超时根因）；
+        // 滤镜去掉 writer_pdf_Export，改自动检测（对 pptx 会正确走 impress_pdf_Export）
+        String userInstallation = "file://" + System.getProperty("java.io.tmpdir") + "lo_profile_" + System.currentTimeMillis();
         if (osName.contains("Windows")) {
-            command = "cmd /c start soffice --headless --invisible --convert-to pdf:writer_pdf_Export " + inputFile + " --outdir " + pdfFile;
+            command = "cmd /c start soffice --headless --invisible -env:UserInstallation=" + userInstallation + " --convert-to pdf " + inputFile + " --outdir " + pdfFile;
         }else {
-            command = "/Applications/LibreOffice.app/Contents/MacOS/soffice --headless --invisible --convert-to pdf:writer_pdf_Export " + inputFile + " --outdir " + pdfFile;
+            command = "/Applications/LibreOffice.app/Contents/MacOS/soffice --headless --invisible -env:UserInstallation=" + userInstallation + " --convert-to pdf " + inputFile + " --outdir " + pdfFile;
         }
         flag = executeCommand(command);
         long end = System.currentTimeMillis();
-        
+
         log.debug("用时:{} ms", end - start);
         return flag;
     }
