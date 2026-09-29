@@ -24,10 +24,17 @@
 - [调研动态搜图图库 API 选型](issues/03-research-image-api.md)：Pexels 首选（免费商用、中文 locale、2万次/月），Bing Image 备选（中文命中最高但版权风险），Unsplash 补充。
 - [调研 yiyan-ppt 的地图与动态搜图机制](issues/01-research-yiyan-ppt.md)：地图=Markdown 标题层级→页类型→mode.json 版式参数；动态搜图很糙（百度爬虫、仅标题关键词、随机抽图）；可借鉴 mode.json 版式参数化 + Markdown→树→逐标题。
 - [调研 ppt-master 的母版与套模板机制](issues/02-research-ppt-master.md)：真母版=直写 OOXML + SVG 标注中间层，双端导出；可借鉴「语义中间层单源双端」「占位符分层建模」；整体体量巨大不宜照搬。
+- [确定幻灯片版式清单](issues/05-slide-layout-taxonomy.md)：v1 纳入 9 版式（cover/agenda/section/content/image_text/full_image/quote/comparison/closing），timeline/chart 推 v2；动态搜图仅 image_text/full_image/quote，cover/section 用主题内置背景图，其余不配图。
+- [确定幻灯片数据结构与内容→版式判定机制](issues/06-slide-data-structure-and-layout-mapping.md)：数据结构选 C（混合）——LLM 输出含 layout 的结构化 JSON（9 slug 枚举 + 版式字段），样式参数化进模板配置；layout 由 LLM 判 + 规则兜底（首 cover 末 closing、缺省回退 content）；image_text/full_image/quote 带 image 配图字段。
+- [确定 PNG 预览渲染路径](issues/07-png-preview-rendering-path.md)：选 A（LibreOffice headless 从 .pptx 渲染）；管线 .pptx→PDF(soffice)→每页 PNG(pdftoppm -r 150)；server 侧执行 + subprocess 加 timeout；LibreOffice/poppler 均已装。
+- [确定动态搜图方案](issues/08-dynamic-image-search-scheme.md)：图库=百度图片搜索；关键词 LLM 出 2~6 字中文实义词、不翻译；image_text 取缩略图、full_image/quote 加修饰词并抓原图；按关键词缓存 + 失败回退 bg_0~3（image_text 降级 content）+ 不主动署名。
+- [确定生成路径与 fabric.js 细编辑路径的共存关系](issues/09-generation-vs-fabric-fineedit-coexistence.md)：单一转换链 + 编辑覆盖；落库双存（ppt_slide_content 语义态 + 新增 ppt_slide_elements 可空存编辑态，结束双义）；预览走 ppt_image_url、细编辑读 elements 优先否则 content 转 elements、下载 regenerate；语义→元素转换落点实现期定。
+- [确定母版/版式结构与 9 slug 映射](issues/10-master-layout-structure-mapping.md)：主题 4 套（数据）、母版 1 套（结构）；预置一个 .potx（1 master + 3~4 版式）；文字结构页（cover/agenda/section/content/closing）真占位符、视觉页（image_text/full_image/quote/comparison）Blank 代码画。
+- [确定字体与配色配置结构](issues/11-font-and-color-config.md)：字体全局一套不 per-theme（.pptx 显式 font.name=微软雅黑/Noto Sans CJK SC，PNG 跨平台候选列表）；配色以 THEMES 为唯一事实源迁出代码进模板配置、删死代码 colors.json；五色够用不加 per-版式颜色。
 
 ## Not yet specified
 
-- 与现有 fabric.js 细编辑路径（`build_pptx_from_elements`）如何共存 —— 依赖 ticket 05、06 的结论
+（无 —— 已全部规格化为 ticket）
 
 ## Out of scope
 
