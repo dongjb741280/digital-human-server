@@ -4,7 +4,10 @@ package cn.iocoder.yudao.module.digital.util;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -44,22 +47,22 @@ public class PptToPdfUtil {
      */
     public static boolean executeCommand(String command) {
         log.info("开始进行转化.......");
-        Process process;// Process可以控制该子进程的执行或获取该子进程的信息
+        Process process;
         try {
             log.debug("convertOffice2PDF cmd : {}", command);
-            process = Runtime.getRuntime().exec(command);// exec()方法指示Java虚拟机创建一个子进程执行指定的可执行程序，并返回与该子进程对应的Process对象实例。
-            // 下面两个可以获取输入输出流
-//            InputStream errorStream = process.getErrorStream();
-//            InputStream inputStream = process.getInputStream();
+            process = Runtime.getRuntime().exec(command);
         } catch (IOException e) {
             log.error(" convertOffice2PDF {} error", command, e);
             return false;
         }
+        // 关键：读取子进程 stdout/stderr，否则管道缓冲写满会阻塞 soffice；输出同时留作诊断
+        drainStream(process.getInputStream(), "stdout");
+        drainStream(process.getErrorStream(), "stderr");
         int exitStatus = 0;
         try {
-            // 加超时：历史上本机没装 LibreOffice 时 waitFor() 无超时导致挂起
             boolean finished = process.waitFor(120, TimeUnit.SECONDS);
             if (!finished) {
+                process.descendants().forEach(ProcessHandle::destroyForcibly);
                 process.destroyForcibly();
                 log.error("convertOffice2PDF 超时，已强制终止: {}", command);
                 return false;
@@ -77,9 +80,23 @@ public class PptToPdfUtil {
         } else {
             log.debug("convertOffice2PDF cmd exitStatus {}", exitStatus);
         }
-        process.destroy(); // 销毁子进程
+        process.destroy();
         log.info("转化结束.......");
         return true;
+    }
+
+    private static void drainStream(InputStream in, String tag) {
+        Thread t = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log.info("soffice[{}]: {}", tag, line);
+                }
+            } catch (IOException ignored) {
+            }
+        });
+        t.setDaemon(true);
+        t.start();
     }
 
     public static void main(String[] args) {
