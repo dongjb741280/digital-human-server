@@ -130,17 +130,17 @@ public class AiDhPptServiceImpl implements AiDhPptService {
                 JSONObject data = getPpt.getJSONObject("data");
                 String pptUrl = data.getString("pptUrl");
                 String recordDesc = data.getString("recordDesc");
-                JSONArray images = data.getJSONArray("images");
                 JSONObject notesMap = data.getJSONObject("notesMap");
                 slides = data.getJSONArray("slides");
                 // 落文案主表 + PPT 记录（明细表里的 pptId 用 PPT 记录 id）
                 String copywriteContent = jsonObject.getString("text") != null ? jsonObject.getString("text") : jsonObject.getString("content");
                 copywriteId = copywritingManagementService.copywritingCreate(jsonObject.getString("doc_name"), jsonObject.getString("title"), copywriteContent, oprStaffId);
                 pptId = copywritingManagementService.copywritingCreatePPT(copywriteId, pptUrl, recordDesc, oprStaffId);
-                //图片由 Python 侧渲染并上传，这里直接落明细表
+                //图片由 server 侧 LibreOffice 渲染（soffice→PDF→PDFBox→PNG），保证与 .pptx 版式/字体一致
                 try {
-                    for (int i = 0; i < images.size(); i++) {
-                        String imageUrl = images.getString(i);
+                    List<String> imageUrls = renderPptToImages(pptUrl, pptId);
+                    for (int i = 0; i < imageUrls.size(); i++) {
+                        String imageUrl = imageUrls.get(i);
                         String notesMapString = notesMap.getString(String.valueOf(i));
                         Map<String, Object> params = new HashMap<>();
                         params.put("pptId",pptId);
@@ -243,6 +243,46 @@ public class AiDhPptServiceImpl implements AiDhPptService {
         attachAgentRole(jsonObject);
         JSONObject getPpt = callPythonService.callToPPtPythonPost(jsonObject,interName);
         return getPpt;
+    }
+
+    /**
+     * 下载 .pptx -> soffice 转 PDF -> PDFBox 转每页 PNG -> 上传 MinIO，返回每页图片 URL。
+     * 让预览 PNG 与 .pptx 版式/字体一致（替代引擎 Pillow 渲染）。
+     */
+    private List<String> renderPptToImages(String pptKey, String pptId) throws Exception {
+        String fileName = pptKey.substring(pptKey.lastIndexOf('/') + 1);
+        String filePrefix = fileName.substring(0, fileName.lastIndexOf('.'));
+        File pptFile = new File(sourcePath, fileName);
+
+        minioClientService.initMinioClient();
+        byte[] pptBytes = minioClientService.minioDownload(MinioClientService.toObjectKey(pptKey));
+        try (FileOutputStream fos = new FileOutputStream(pptFile)) {
+            fos.write(pptBytes);
+        }
+
+        boolean ok = PptToPdfUtil.convert2PDF(pptFile.getAbsolutePath(), sourcePath);
+        if (!ok) {
+            Files.deleteIfExists(pptFile.toPath());
+            throw new RuntimeException("ppt转pdf失败");
+        }
+        File pdfFile = new File(sourcePath, filePrefix + ".pdf");
+        List<byte[]> pngList;
+        try (FileInputStream fis = new FileInputStream(pdfFile)) {
+            byte[] pdfBytes = new byte[(int) pdfFile.length()];
+            fis.read(pdfBytes);
+            pngList = PdfToImageUtil.pdfToImage(pdfBytes);
+        }
+
+        minioClientService.initMinioClient();
+        List<String> urls = new ArrayList<>();
+        for (int i = 0; i < pngList.size(); i++) {
+            String fileStr = pptId + "_" + i + ".png";
+            urls.add(minioClientService.minioUpload(pngList.get(i), fileStr, "png"));
+        }
+
+        Files.deleteIfExists(pdfFile.toPath());
+        Files.deleteIfExists(pptFile.toPath());
+        return urls;
     }
 
     @Override

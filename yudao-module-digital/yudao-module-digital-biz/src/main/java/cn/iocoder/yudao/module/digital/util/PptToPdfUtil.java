@@ -5,6 +5,7 @@ package cn.iocoder.yudao.module.digital.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class PptToPdfUtil {
@@ -53,11 +54,18 @@ public class PptToPdfUtil {
         }
         int exitStatus = 0;
         try {
-            exitStatus = process.waitFor();// 等待子进程完成再往下执行，返回值是子线程执行完毕的返回值,返回0表示正常结束
-            // 第二种接受返回值的方法
-            int i = process.exitValue(); // 接收执行完毕的返回值
-            log.debug("i----" + i);
+            // 加超时：历史上本机没装 LibreOffice 时 waitFor() 无超时导致挂起
+            boolean finished = process.waitFor(120, TimeUnit.SECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                log.error("convertOffice2PDF 超时，已强制终止: {}", command);
+                return false;
+            }
+            exitStatus = process.exitValue();
+            log.debug("exitStatus----" + exitStatus);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            process.destroyForcibly();
             log.error("InterruptedException  convertOffice2PDF {}", command, e);
             return false;
         }
