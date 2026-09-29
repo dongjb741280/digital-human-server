@@ -5,10 +5,10 @@ package cn.iocoder.yudao.module.digital.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class PptToPdfUtil {
@@ -24,7 +24,7 @@ public class PptToPdfUtil {
         String command;
         boolean flag;
         String osName = System.getProperty("os.name");
-        // 每次用独立 profile，避免与 GUI/并发实例抢锁导致 soffice 卡死（历史 120s 超时根因）；
+        // 每次用独立 profile，避免与 GUI/并发实例抢锁导致 soffice 卡死；
         // 滤镜去掉 writer_pdf_Export，改自动检测（对 pptx 会正确走 impress_pdf_Export）
         String userInstallation = "file://" + System.getProperty("java.io.tmpdir") + "lo_profile_" + System.currentTimeMillis();
         if (osName.contains("Windows")) {
@@ -32,7 +32,11 @@ public class PptToPdfUtil {
         }else {
             command = "/Applications/LibreOffice.app/Contents/MacOS/soffice --headless --invisible -env:UserInstallation=" + userInstallation + " --convert-to pdf " + inputFile + " --outdir " + pdfFile;
         }
-        flag = executeCommand(command);
+        // 输出 PDF 与输入同名（.pdf 后缀），soffice 生成到 outdir
+        String inputName = new File(inputFile).getName();
+        String pdfName = inputName.substring(0, inputName.lastIndexOf('.')) + ".pdf";
+        File outputPdf = new File(pdfFile, pdfName);
+        flag = executeAndWaitForPdf(command, outputPdf);
         long end = System.currentTimeMillis();
 
         log.debug("用时:{} ms", end - start);
@@ -41,11 +45,10 @@ public class PptToPdfUtil {
 
 
     /**
-     * 执行command指令
-     * @param command
-     * @return
+     * 执行命令：启动 soffice 后轮询 PDF 是否产出，而非等进程退出。
+     * macOS + 高版本 JDK 下 soffice 转换完成后进程可能不退出，导致 waitFor 一直超时。
      */
-    public static boolean executeCommand(String command) {
+    private static boolean executeAndWaitForPdf(String command, File outputPdf) {
         log.info("开始进行转化.......");
         Process process;
         try {
@@ -55,34 +58,37 @@ public class PptToPdfUtil {
             log.error(" convertOffice2PDF {} error", command, e);
             return false;
         }
-        // 关键：读取子进程 stdout/stderr，否则管道缓冲写满会阻塞 soffice；输出同时留作诊断
+        // 读取子进程 stdout/stderr，防管道缓冲写满阻塞，同时留作诊断
         drainStream(process.getInputStream(), "stdout");
         drainStream(process.getErrorStream(), "stderr");
-        int exitStatus = 0;
-        try {
-            boolean finished = process.waitFor(120, TimeUnit.SECONDS);
-            if (!finished) {
-                process.descendants().forEach(ProcessHandle::destroyForcibly);
-                process.destroyForcibly();
-                log.error("convertOffice2PDF 超时，已强制终止: {}", command);
+        long deadline = System.currentTimeMillis() + 30_000;
+        long lastSize = -1;
+        while (System.currentTimeMillis() < deadline) {
+            if (outputPdf.exists() && outputPdf.length() > 0) {
+                long size = outputPdf.length();
+                if (size == lastSize) {
+                    // 大小连续两次一致，认为写入完成
+                    process.destroyForcibly();
+                    log.info("转化结束.......");
+                    return true;
+                }
+                lastSize = size;
+            } else if (!process.isAlive()) {
+                log.error("convertOffice2PDF 进程退出且未产出 PDF，exitStatus {}", process.exitValue());
                 return false;
             }
-            exitStatus = process.exitValue();
-            log.debug("exitStatus----" + exitStatus);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            process.destroyForcibly();
-            log.error("InterruptedException  convertOffice2PDF {}", command, e);
-            return false;
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                process.destroyForcibly();
+                return false;
+            }
         }
-        if (exitStatus != 0) {
-            log.error("convertOffice2PDF cmd exitStatus {}", exitStatus);
-        } else {
-            log.debug("convertOffice2PDF cmd exitStatus {}", exitStatus);
-        }
-        process.destroy();
-        log.info("转化结束.......");
-        return true;
+        process.descendants().forEach(ProcessHandle::destroyForcibly);
+        process.destroyForcibly();
+        log.error("convertOffice2PDF 超时，已强制终止: {}", command);
+        return false;
     }
 
     private static void drainStream(InputStream in, String tag) {
