@@ -148,6 +148,7 @@ public class AiDhPptServiceImpl implements AiDhPptService {
                         params.put("pptImageUrl",imageUrl);
                         params.put("pptImageWords",notesMapString);
                         params.put("pptSlideContent", slides != null && i < slides.size() ? slides.getJSONObject(i).toJSONString() : "");
+                        params.put("pptSlideElements", "");
                         params.put("pptVoiceUrl","");
                         params.put("pptVoiceLength","");
                         params.put("pptVoiceHumanUrl","");
@@ -199,8 +200,8 @@ public class AiDhPptServiceImpl implements AiDhPptService {
                 Map<String, Object> params = new HashMap<>();
                 params.put("pptId", pptId);
                 params.put("pptNum", s.getInteger("pptNum"));
-                params.put("pptSlideContent", s.getString("content"));
-                commonMapper.updatePptSlideContent(params);
+                params.put("pptSlideElements", s.getString("content"));
+                commonMapper.updatePptSlideElements(params);
             }
         }
         JSONObject result = new JSONObject();
