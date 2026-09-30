@@ -17,10 +17,11 @@ PPT 制作 = **AI 一键生成课件 PPT → 前端逐页细编辑 → 重新生
 ### 相对旧版的关键变化
 
 - 幻灯片内容从「标题+要点」两种版式扩展为 **9 种版式**，由每页 `layout` 字段驱动。
-- 图片版式（`image_text`/`full_image`/`quote`）由 **百度图片动态搜图** 配图，搜图失败降级（回退主题背景 / 占位 / 白底）。
+- **主题改为 2 套模版**（图文模版 / 文本模版，参照 yiyan-ppt）：封面用 `title.png`、内容页随机用 `img/` 背景图；版式参数（画布尺寸 + 标题/正文/图片坐标 + 字号）由 `mode.json` 驱动。
+- 图片版式（`image_text`/`full_image`/`quote`）由 **百度图片动态搜图** 配图，搜图失败降级（回退主题背景 / 占位）。
 - PNG 预览改由 **Java 侧 LibreOffice** 渲染（替代引擎 Pillow 逐页出图，避免 PNG 与 .pptx 脱节）。
 - 细编辑用 **双列存储**：语义态 `ppt_slide_content` + 编辑态 `ppt_slide_elements`，互不覆盖。
-- 主题配色从代码迁出到 `templates/themes.json`；`.pptx` 显式设置中文字体（微软雅黑）。
+- `.pptx` 显式设置中文字体（微软雅黑）。
 
 ## 2. 参与者
 
@@ -91,9 +92,9 @@ sequenceDiagram
 - 接口：`POST /digital-api/system/aiDhPpt/generate_ppt`（controller `AiDhPptController`，service `AiDhPptServiceImpl.generatePpt`）
 - 入参：`title`（标题）、`text`/`content`（文案正文）、`pptId`/`templateId`（主题 id）、`doc_name`、`user`（操作工号）、可选 `smart_id`（智能体人设）
 - Python：`app.py` 的 `generate_ppt` → `services/ppt.py`
-  - `generate_slides()`：LLM 把正文整理成 **9 版式结构化 JSON**，每页含 `layout` 字段 + 版式专属字段（`title`/`bullets`/`items`/`image`/`left`/`right`/`text`/`source`/`subtitle`/`notes` 等），控制在 6~10 页；`_normalize_slides()` 做规则兜底（首项强制 `cover`、末项强制 `closing`、未知/缺省 `layout` 回退 `content`）。
-  - `build_pptx()`：`python-pptx` 按 `layout` 分派渲染 9 版式生成 `.pptx`，上传 `copywriting/{pptId}/{pptId}.pptx`。
-  - 图片版式（`image_text`/`full_image`/`quote`）：`services/image_search.py` 调百度图片（`image.baidu.com/search/acjson`）按 `image` 关键词搜图并下载，`full_image`/`quote` 加「壁纸」修饰；搜图失败回退主题背景/占位/白底。
+  - `generate_slides()`：LLM 把正文整理成 **9 版式结构化 JSON**，每页含 `layout` 字段 + 版式专属字段（`title`/`bullets`/`items`/`image`/`left`/`right`/`text`/`source`/`subtitle`/`notes` 等），控制在 6~10 页；prompt 引导**至少 2~3 页用 `image_text`/`full_image` 配图**（`image` 填 2~6 字中文关键词）；`_normalize_slides()` 做规则兜底（首项强制 `cover`、末项强制 `closing`、未知/缺省 `layout` 回退 `content`）。
+  - `build_pptx()`：`python-pptx` 按 `layout` 分派渲染 9 版式生成 `.pptx`；**画布尺寸、标题/正文/图片坐标、字号由 `mode.json` 驱动**（封面 `title.png`、内容页随机 `img/` 背景），上传 `copywriting/{pptId}/{pptId}.pptx`。
+  - 图片版式（`image_text`/`full_image`/`quote`）：`services/image_search.py` 调百度图片（`image.baidu.com/search/acjson`）按 `image` 关键词搜图并下载，`full_image`/`quote` 加「壁纸」修饰；搜图失败回退主题背景/占位。请求用 **Windows Chrome UA + 无 Referer + requests 自动解压**（防百度反爬 `Forbid spider access`）。
   - 返回 `{pptUrl, recordDesc, slides[]}`（不再返回引擎渲染的 `images[]`）。
 - 后端 `AiDhPptServiceImpl.generatePpt`：
   1. `copywritingCreate()` 落文案主表 → 返回 `copywriteId`；
@@ -102,7 +103,7 @@ sequenceDiagram
   4. 逐页 `commonMapper.insertPptRecordDetail()` 落明细（`ppt_slide_content` 存语义态 JSON，`ppt_slide_elements` 存空，`ppt_image_url` 存 LibreOffice 渲染的预览图）。
 - 返回 `{pptId, copywriteId, slides[]}` 供前端预览/编辑。
 
-> 说明：PPT 出图改为 **Java 侧 LibreOffice**（soffice→PDF→PDFBox），保证预览 PNG 与 .pptx 版式/字体一致；引擎的 Pillow 仅保留 `list_templates` 的主题缩略图渲染。`PptToPdfUtil` 的 `waitFor()` 加了 120s 超时，超时强制终止。
+> 说明：PPT 出图改为 **Java 侧 LibreOffice**（soffice→PDF→PDFBox），保证预览 PNG 与 .pptx 版式/字体一致；引擎的 Pillow 仅保留 `list_templates` 的主题缩略图渲染。`PptToPdfUtil` 改为**轮询 PDF 是否产出**（非等进程退出，30s 超时）+ `-env:UserInstallation` 独立 profile + 读 stdout/stderr + 超时杀进程树。
 
 ### ② 查询每页图片与备注 = getPptRecordDetail
 
@@ -167,9 +168,10 @@ sequenceDiagram
 - **fabric 画布 JSON 是编辑态**：每页元素以 `{"objects":[{type, left, top, width, height, scaleX, scaleY, ...}]}` 存 `ppt_slide_elements`；`regenerate_ppt` 直接读这个结构重建 .pptx。
 - **坐标换算**：fabric 画布按 1280px 宽设计，`_PX2EMU = 9525`（1px = 9525 EMU），对应 .pptx 13.333 英寸宽；`fontSize` 乘 0.75 把 px 字号换算成 pt。
 - **`pptId` 语义复用**：`regenerate_ppt` 里 Java 把 `templateId` 放进请求的 `pptId` 字段传给 Python（用来选主题 `get_template`），而真正的记录 id 只用于 Java 侧回写 `ppt_url`——两处 `pptId` 含义不同，注意区分。
-- **图片三种来源**：① 生成期图片版式（`image_text`/`full_image`/`quote`）由 `image_search.py` 百度搜图；② `build_pptx_from_elements` 的图片元素 `src` 支持 `data:image` base64 或 http URL（`urllib` 拉取），URL 拉取失败时静默跳过；③ 主题背景图 `bg_0~3.jpg` 作兜底。
-- **主题模板**：`services/templates/themes.json` 内置 4 套主题（`0` 课程学习汇报 / `1` 读书分享演示 / `2` 蓝色通用商务 / `3` 蓝色工作汇报总结），`_load_themes()` 加载（配色唯一事实源，旧 `colors.json` 已删除）；`get_template` 找不到时回退第一套。
-- **中文字体**：`.pptx` 侧显式 `font.name = 微软雅黑`（latin + east asian 都设）；Pillow 侧 `_FONT_CANDIDATES` 跨平台候选（macOS/Linux/Windows）。
+- **图片三种来源**：① 生成期图片版式（`image_text`/`full_image`/`quote`）由 `image_search.py` 百度搜图；② `build_pptx_from_elements` 的图片元素 `src` 支持 `data:image` base64 或 http URL（`urllib` 拉取），URL 拉取失败时静默跳过；③ 主题背景图 `mode1/img/图片*.png` / `mode2/img/图片*.png` 作兜底。
+- **主题模板**：`services/templates/themes.json` 定义 2 套模版（`0` 图文模版 / `1` 文本模版，参照 yiyan-ppt），各含 `title_image`（封面图）+ `backgrounds`（内容页背景列表）+ `mode`（`mode.json` 版式参数）；`_load_themes()` 加载（颜色转 tuple + 解析 mode.json）；`get_template` 找不到时回退第一套。
+- **版式参数**：`mode.json` 提供 `slide_size`（画布尺寸 cm）、`first_page`/`catalog_page`/`main_page` 的 `title_info`/`content_info`/`img_info`（坐标 cm + 字号）。9 版式映射：cover/section/closing→first_page，agenda→catalog_page，content/image_text/full_image/quote/comparison→main_page。
+- **中文字体**：`.pptx` 侧显式 `font.name = 微软雅黑`（latin + east asian 都设）。
 - **PPT 记录版本**：同一文案可多次生成/上传 PPT，`copywritingListPPT` 按 `record_version` 排序展示；系统生成 `record_version=1` 起。
 - **删除连带**：删文案/PPT 时同步清理关联的 PPT 记录与每页明细（见 `CopywritingManagementServiceImpl.copywritingDelete` / `copywritingPPTDelete`）。
 
@@ -233,8 +235,8 @@ sequenceDiagram
 
 ### 7.8 生成 PPT 时 Java 侧 LibreOffice 转 PDF 超时/失败
 
-**现象**：`generate_ppt` 在渲染 PNG 阶段失败，日志含 `convertOffice2PDF 超时` 或 LibreOffice 报错。
+**现象**：`generate_ppt` 在渲染 PNG 阶段失败，日志含 `convertOffice2PDF 超时` 或「ppt转pdf失败」。
 
-**原因**：目标机未装 LibreOffice，或 soffice 路径不对（`PptToPdfUtil` 硬编码 `/Applications/LibreOffice.app/Contents/MacOS/soffice`，Windows 分支为 `cmd /c start soffice ...`）；`waitFor()` 已加 120s 超时并强制终止，避免历史挂起。
+**原因**：**服务端 JVM 用了 JDK 23（openjdk-23）**——在 macOS 上 `Runtime.exec(soffice)` 会卡死（soffice 起不来、不打印不写文件）；用 **JDK 21（corretto-21）则 5 秒正常转出 PDF**。也可能目标机未装 LibreOffice，或 soffice 路径不对（`PptToPdfUtil` 硬编码 `/Applications/LibreOffice.app/Contents/MacOS/soffice`）。
 
-**解决**：确保部署机已装 LibreOffice 且路径匹配 `PptToPdfUtil` 中的 os 分支；超时可通过调整 `PptToPdfUtil.executeCommand` 的 `waitFor(120, TimeUnit.SECONDS)` 参数。
+**解决**：把 IntelliJ 里服务端 Run Configuration 的 JDK 换成 **corretto-21** 并重启（最关键）；确保部署机已装 LibreOffice 且路径匹配 `PptToPdfUtil` 的 os 分支。
