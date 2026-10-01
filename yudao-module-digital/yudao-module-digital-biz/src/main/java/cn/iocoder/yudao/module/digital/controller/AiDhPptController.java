@@ -160,6 +160,26 @@ public class AiDhPptController {
     }
 
     /**
+     * ppt-master 引擎生成 PPT（一键直出：主题/页数/素材/模板 → 原生可编辑 .pptx）
+     */
+    @PostMapping("/generate_ppt_master")
+    @Operation(summary = "ppt-master 引擎生成 PPT")
+    public CommonResult<JSONObject> generatePptMaster(@RequestBody JSONObject reqParam) {
+        log.info("generatePptMaster 生成ppt方法：" + reqParam);
+        try {
+            JSONObject result = aiDhPptService.generatePptMaster(reqParam);
+            if (result != null && "0000".equals(result.getString("code"))) {
+                return success(result.getJSONObject("data"));
+            }
+            return CommonResult.error(GlobalErrorCodeConstants.UNKNOWN.getCode(),
+                    result != null ? result.getString("msg") : "生成失败");
+        } catch (Exception e) {
+            log.info("调用 generatePptMaster error：" + e.getMessage());
+            return error(GlobalErrorCodeConstants.UNKNOWN);
+        }
+    }
+
+    /**
      * 保存 PPT 编辑结果（每页 fabric 画布 JSON）
      */
     @PostMapping("/save_ppt_edit")

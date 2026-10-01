@@ -74,6 +74,21 @@ public class AbilityShareClient {
         return execute(builder, getDefaultCharset());
     }
     /**
+     * post请求（长超时，ppt-master 生成是分钟级）
+     *
+     * @param url
+     * @param header
+     * @param body
+     * @return
+     */
+    public static String doPostPPtLong(String url, Map<String, String> header, String body) {
+        HttpRequest.BodyPublisher bodyPublisher = HttpRequest.BodyPublishers.ofString(body, getDefaultCharset());
+        Duration durationSeconds = Duration.ofSeconds(900);//秒
+        HttpRequest.Builder builder = HttpRequest.newBuilder().timeout(durationSeconds).uri(URI.create(url)).POST(bodyPublisher);
+        buildHeader(header, builder);
+        return execute(builder, getDefaultCharset());
+    }
+    /**
      * form表单
      *
      * @param url

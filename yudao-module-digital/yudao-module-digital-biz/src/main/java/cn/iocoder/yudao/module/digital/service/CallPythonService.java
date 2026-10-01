@@ -84,6 +84,25 @@ public class CallPythonService {
     }
 
     /**
+     * 调用 ppt 相关 python 接口（长超时，ppt-master 生成是分钟级）
+     */
+    public JSONObject callToPPtPythonPostLong(JSONObject request,String interName) {
+        JSONObject result = null;
+        String url = digitalAbilityConfig.getAbigetpptUrl()+interName;
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=UTF-8");  //传参格式
+        headers.put("Accept", "application/json");
+        try {
+            String s = AbilityShareClient.doPostPPtLong(url, headers,JSONObject.toJSONString(request));
+            result = JSONObject.parseObject(s);
+        } catch (Exception e) {
+            log.error("callToPPtPythonPostLong:{}",e);
+
+        }
+        return result;
+    }
+
+    /**
      * 异步处理 ppt 转图片
      * @param request
      * @return

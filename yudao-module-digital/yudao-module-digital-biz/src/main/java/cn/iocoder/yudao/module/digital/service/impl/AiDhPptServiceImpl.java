@@ -190,6 +190,67 @@ public class AiDhPptServiceImpl implements AiDhPptService {
         result.put("data", data);
         return result;
     }
+
+    @Override
+    public JSONObject generatePptMaster(JSONObject jsonObject) throws Exception {
+        String interName = "/generate_ppt_master";
+        String oprStaffId = jsonObject.getString("user");
+
+        JSONObject getPpt = callPythonService.callToPPtPythonPostLong(jsonObject, interName);
+        log.info("调用python接口返回结果：" + getPpt);
+        if (getPpt == null || !"0000".equals(getPpt.getString("code"))) {
+            JSONObject errorResult = new JSONObject();
+            errorResult.put("code", "9999");
+            String errMsg = getPpt != null ? getPpt.getString("msg") : "ppt-master 生成服务无响应";
+            errorResult.put("msg", errMsg == null ? "ppt-master 生成失败" : errMsg);
+            return errorResult;
+        }
+
+        JSONObject data = getPpt.getJSONObject("data");
+        String pptUrl = data.getString("pptUrl");
+        String recordDesc = data.getString("recordDesc");
+        String title = jsonObject.getString("title") != null ? jsonObject.getString("title") : jsonObject.getString("topic");
+        String docName = jsonObject.getString("doc_name") != null ? jsonObject.getString("doc_name") : title;
+        // ppt-master 一键直出，无正文/大纲，文案主表内容用主题占位
+        String copywriteId = copywritingManagementService.copywritingCreate(docName, title, title, oprStaffId);
+        String pptId = copywritingManagementService.copywritingCreatePPT(copywriteId, pptUrl, recordDesc, oprStaffId);
+
+        // 预览图：复用 soffice→PDF→PNG 渲染（与 .pptx 版式一致）。失败不阻断主产物，仅记录日志。
+        try {
+            List<String> imageUrls = renderPptToImages(pptUrl, pptId);
+            for (int i = 0; i < imageUrls.size(); i++) {
+                Map<String, Object> params = new HashMap<>();
+                params.put("pptId", pptId);
+                params.put("pptNum", i);
+                params.put("pptImageUrl", imageUrls.get(i));
+                params.put("pptImageWords", "");
+                params.put("pptSlideContent", "");
+                params.put("pptSlideElements", "");
+                params.put("pptVoiceUrl", "");
+                params.put("pptVoiceLength", "");
+                params.put("pptVoiceHumanUrl", "");
+                params.put("pptVideoImageUrl", "");
+                params.put("oprTime", DateUtils.formatDate(new Date(), DateUtils.FORMAT_YYYYMMDD24HHMMSS));
+                params.put("oprStaff", oprStaffId);
+                commonMapper.insertPptRecordDetail(params);
+            }
+        } catch (Exception e) {
+            log.error("ppt-master 生成图片异常", e);
+        }
+
+        JSONObject result = new JSONObject();
+        result.put("code", "0000");
+        result.put("msg", "ppt-master 生成成功");
+        JSONObject resultData = new JSONObject();
+        resultData.put("pptId", pptId);
+        resultData.put("copywriteId", copywriteId);
+        resultData.put("pptUrl", pptUrl);
+        resultData.put("recordDesc", recordDesc);
+        resultData.put("summary", data.getString("summary"));
+        result.put("data", resultData);
+        return result;
+    }
+
     @Override
     public JSONObject savePptEdit(JSONObject jsonObject) throws Exception {
         String pptId = jsonObject.getString("pptId");
