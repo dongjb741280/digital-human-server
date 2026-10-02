@@ -46,10 +46,12 @@ sequenceDiagram
 
     Note over ORCH,LLM: 后台线程生成（异步）
     loop tool-use 循环（最多 300 轮）
-        ORCH->>LLM: Anthropic /v1/messages（stream + thinking adaptive）
+        ORCH->>LLM: Anthropic /v1/messages（stream + thinking adaptive + prompt caching）
         LLM-->>ORCH: 工具调用（bash / read_file / write_file / web_search / web_fetch）
         ORCH->>ORCH: 执行引擎脚本：project_manager.py / svg_quality_checker.py / svg_to_pptx.py
     end
+    Note over ORCH: 生成讲解词：executor-notes.md → notes/total.md → total_md_split.py 拆分 → --with-notes 导出
+    ORCH->>ORCH: 从 notes/ 读取每页讲解词 → notesMap
     ORCH->>MIO: 上传 copywriting/pptmaster_<ts>/pptmaster_<ts>.pptx
     Note over ORCH: 任务状态 → success
 
@@ -65,7 +67,7 @@ sequenceDiagram
     BE->>MIO: 下载 .pptx
     BE->>LO: soffice → PDF → PDFBox 逐页 PNG
     BE->>MIO: 上传每页 PNG 预览
-    BE->>DB: INSERT 每页明细（ppt_image_url=预览图，语义/编辑态置空）
+    BE->>DB: INSERT 每页明细（ppt_image_url=预览图，ppt_image_words=讲解词）
     BE-->>FE: {status: success, pptId, copywriteId, pptUrl, summary}
     FE->>BE: POST /copyWritManage/downloadPPT (id=pptId) 下载 .pptx
 ```
@@ -95,10 +97,12 @@ sequenceDiagram
 
 - 接口：`POST /digital-api/system/aiDhPpt/generate_ppt_master`（service `AiDhPptServiceImpl.generatePptMaster`）
 - 转发：`callToPPtPythonPostLong()` → Python `POST /generate_ppt_master`（长超时 900s，同步阻塞）。
-- Python：`app.py:/generate_ppt_master` → `services/ppt_master.py:generate_deck()`（与异步走同一核心 `_generate_ppt_master_body`），返回 `{pptUrl, recordDesc, summary, usage}`。
+- Python：`app.py:/generate_ppt_master` → `services/ppt_master.py:generate_deck()`（与异步走同一核心 `_generate_ppt_master_body`），返回 `{pptUrl, recordDesc, summary, usage, notesMap}`。
 - 后端同步落库并返回 `{pptId, copywriteId, pptUrl, recordDesc, summary}`。前端已切到异步，此接口保留给其他调用方/调试。
 
 > 核心参数与工具：`title`（必填）、`pages`（4~30）、`lang`、`canvas`、`images`（none/web）、`sources`（可空）、`template`（可空）；引擎工具 `bash`/`read_file`/`write_file`/`web_search`/`web_fetch`（软沙箱，非 OS 级）；产出 `projects/pptmaster_<ts>_*/exports/*.pptx` → MinIO。
+>
+> 讲解词：引擎 prompt 已开 `--with-notes`（先写 `notes/total.md` → `total_md_split.py` 拆成 `notes/*.md` → 导出带备注）；`_extract_project_notes()` 从 `notes/` 读回每页讲解词作 `notesMap`，Java 落库到 `ppt_image_words`。
 
 ## 5. 数据表
 
@@ -106,7 +110,7 @@ sequenceDiagram
 |---|---|
 | `tb_ai_dh_copywrite` | 文案主表，内容为主题占位，`main_ppt_id` 指向 PPT 记录 |
 | `tb_ai_dh_copywrite_ppt_record` | PPT 记录，`ppt_url` 指向 `copywriting/pptmaster_<ts>/...pptx` |
-| `tb_ai_dh_copywrite_ppt_record_detail` | 每页明细，`ppt_image_url` 存 LibreOffice 预览图（语义/编辑态置空） |
+| `tb_ai_dh_copywrite_ppt_record_detail` | 每页明细，`ppt_image_url` 存 LibreOffice 预览图，`ppt_image_words` 存每页讲解词（`ppt_slide_content`/`ppt_slide_elements` 置空） |
 
 ## 6. 菜单
 
@@ -124,6 +128,7 @@ sequenceDiagram
 - **两条 PPT 路线并存**：`generate_ppt`（9 版式 python-pptx，可细编辑）与 `generate_ppt_master`（SVG→svg_to_pptx 原生可编辑 + 母版/版式），互不替换。
 - **软沙箱非生产隔离**：引擎 `bash` 工具仍 `shell=True`，白名单是进程内字符串过滤；只建议可信内网开启（`PPT_MASTER_ENABLED=1`），不对公网开放。
 - **预览图复用**：与 `generate_ppt` 同一套 `renderPptToImages`（LibreOffice），保证预览与 .pptx 版式一致。
+- **讲解词（speaker notes）**：引擎以 `--with-notes` 导出并返回 `notesMap`，Java 逐页写入 `ppt_image_words`；前端 PPT 预览/编辑页据此展示每页解说词。
 
 ## 8. 故障排查 FAQ
 
