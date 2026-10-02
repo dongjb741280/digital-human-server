@@ -263,7 +263,7 @@ public class AiDhPptServiceImpl implements AiDhPptService {
             if (ctx != null) {
                 synchronized (ctx) {
                     if (ctx.pptId == null) {
-                        JSONObject persisted = persistPptMaster(pptUrl, recordDesc, ctx.title, ctx.docName, ctx.oprStaff);
+                        JSONObject persisted = persistPptMaster(pptUrl, recordDesc, ctx.title, ctx.docName, ctx.oprStaff, data.getJSONObject("notesMap"));
                         ctx.pptId = persisted.getString("pptId");
                         ctx.copywriteId = persisted.getString("copywriteId");
                     }
@@ -293,7 +293,7 @@ public class AiDhPptServiceImpl implements AiDhPptService {
         String title = req.getString("title") != null ? req.getString("title") : req.getString("topic");
         String docName = req.getString("doc_name") != null ? req.getString("doc_name") : title;
         String oprStaffId = req.getString("user");
-        JSONObject persisted = persistPptMaster(pptUrl, recordDesc, title, docName, oprStaffId);
+        JSONObject persisted = persistPptMaster(pptUrl, recordDesc, title, docName, oprStaffId, data.getJSONObject("notesMap"));
 
         JSONObject result = new JSONObject();
         result.put("code", "0000");
@@ -308,7 +308,7 @@ public class AiDhPptServiceImpl implements AiDhPptService {
         return result;
     }
 
-    private JSONObject persistPptMaster(String pptUrl, String recordDesc, String title, String docName, String oprStaffId) {
+    private JSONObject persistPptMaster(String pptUrl, String recordDesc, String title, String docName, String oprStaffId, JSONObject notesMap) {
         // ppt-master 一键直出，无正文/大纲，文案主表内容用主题占位
         String copywriteId = copywritingManagementService.copywritingCreate(docName, title, title, oprStaffId);
         String pptId = copywritingManagementService.copywritingCreatePPT(copywriteId, pptUrl, recordDesc, oprStaffId);
@@ -321,7 +321,8 @@ public class AiDhPptServiceImpl implements AiDhPptService {
                 params.put("pptId", pptId);
                 params.put("pptNum", i);
                 params.put("pptImageUrl", imageUrls.get(i));
-                params.put("pptImageWords", "");
+                String note = notesMap != null ? notesMap.getString(String.valueOf(i)) : null;
+                params.put("pptImageWords", note == null ? "" : note);
                 params.put("pptSlideContent", "");
                 params.put("pptSlideElements", "");
                 params.put("pptVoiceUrl", "");
