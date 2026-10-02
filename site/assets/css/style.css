@@ -186,6 +186,8 @@ img { max-width: 100%; display: block; }
 .grid { display: grid; gap: 24px; }
 .grid-3 { grid-template-columns: repeat(3, 1fr); }
 .grid-2 { grid-template-columns: repeat(2, 1fr); }
+/* 3 列网格末行仅 1 张卡片时居中(核心能力区 7 张卡片) */
+.grid-3 > :last-child:nth-child(3n + 1) { grid-column: 2; }
 
 .card {
   background: var(--bg);
@@ -287,6 +289,7 @@ img { max-width: 100%; display: block; }
   .hero-inner { grid-template-columns: 1fr; gap: 48px; }
   .hero-visual { max-width: 560px; }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 > :last-child:nth-child(3n + 1) { grid-column: auto; }
   .workflow { grid-template-columns: 1fr; }
   .wf-arrow { transform: rotate(90deg); margin: -6px auto; }
   .footer-inner { grid-template-columns: 1fr 1fr; }
