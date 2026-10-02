@@ -103,6 +103,10 @@ sequenceDiagram
 > 核心参数与工具：`title`（必填）、`pages`（4~30）、`lang`、`canvas`、`images`（none/web）、`sources`（可空）、`template`（可空）；引擎工具 `bash`/`read_file`/`write_file`/`web_search`/`web_fetch`（软沙箱，非 OS 级）；产出 `projects/pptmaster_<ts>_*/exports/*.pptx` → MinIO。
 >
 > 讲解词：引擎 prompt 已开 `--with-notes`（先写 `notes/total.md` → `total_md_split.py` 拆成 `notes/*.md` → 导出带备注）；`_extract_project_notes()` 从 `notes/` 读回每页讲解词作 `notesMap`，Java 落库到 `ppt_image_words`。
+>
+> source 图片：`sources` 由引擎 `import-sources` 导入，自动把 source 文档里的图片传播进 `<project>/images/`，SVG 直接引用即入图（绕开 bash 白名单无 `cp` 的限制）。
+>
+> 模版：`template` 传 Layout/Deck 工作区根（如 `skills/ppt-master/templates/decks/中国电信`），产出带真实 `p:sldMaster`/`p:sldLayout`；新建 Deck 模版见 engine 仓库 `docs/deck-template-authoring.md`。
 
 ## 5. 数据表
 
