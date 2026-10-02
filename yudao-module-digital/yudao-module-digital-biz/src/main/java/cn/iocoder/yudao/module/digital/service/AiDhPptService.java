@@ -21,6 +21,10 @@ public interface AiDhPptService {
 
     JSONObject generatePptMaster(JSONObject jsonObject) throws Exception;
 
+    JSONObject submitPptMaster(JSONObject jsonObject) throws Exception;
+
+    JSONObject getPptMasterStatus(String jobId) throws Exception;
+
     JSONObject savePptEdit(JSONObject jsonObject) throws Exception;
 
     JSONObject regeneratePpt(JSONObject jsonObject) throws Exception;

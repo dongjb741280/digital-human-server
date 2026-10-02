@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Project:AiDhPptServiceImpl
@@ -52,6 +53,16 @@ public class AiDhPptServiceImpl implements AiDhPptService {
 
     // PPT→PDF→图片转换需要落本地临时文件，用系统临时目录即可，无需 SFTP/共享盘
     private final String sourcePath = System.getProperty("java.io.tmpdir");
+
+    // ppt-master 异步任务上下文：jobId -> 提交参数 + 落库结果（内存态，幂等落库用）
+    private static class PptMasterJobContext {
+        String title;
+        String docName;
+        String oprStaff;
+        String pptId;
+        String copywriteId;
+    }
+    private final Map<String, PptMasterJobContext> pptMasterJobs = new ConcurrentHashMap<>();
 
     /**
      * 按 smart_id 查出智能体人设(agent_role)，塞进请求里，供 LLM 作为 system prompt 使用
@@ -193,24 +204,111 @@ public class AiDhPptServiceImpl implements AiDhPptService {
 
     @Override
     public JSONObject generatePptMaster(JSONObject jsonObject) throws Exception {
-        String interName = "/generate_ppt_master";
-        String oprStaffId = jsonObject.getString("user");
-
-        JSONObject getPpt = callPythonService.callToPPtPythonPostLong(jsonObject, interName);
+        JSONObject getPpt = callPythonService.callToPPtPythonPostLong(jsonObject, "/generate_ppt_master");
         log.info("调用python接口返回结果：" + getPpt);
         if (getPpt == null || !"0000".equals(getPpt.getString("code"))) {
-            JSONObject errorResult = new JSONObject();
-            errorResult.put("code", "9999");
-            String errMsg = getPpt != null ? getPpt.getString("msg") : "ppt-master 生成服务无响应";
-            errorResult.put("msg", errMsg == null ? "ppt-master 生成失败" : errMsg);
-            return errorResult;
+            return pptMasterError(getPpt);
         }
+        return buildPptMasterResult(jsonObject, getPpt.getJSONObject("data"));
+    }
 
-        JSONObject data = getPpt.getJSONObject("data");
+    @Override
+    public JSONObject submitPptMaster(JSONObject jsonObject) throws Exception {
+        JSONObject getPpt = callPythonService.callToPPtPythonPost(jsonObject, "/generate_ppt_master/submit");
+        log.info("调用python接口返回结果：" + getPpt);
+        if (getPpt == null || !"0000".equals(getPpt.getString("code"))) {
+            return pptMasterError(getPpt);
+        }
+        String jobId = getPpt.getJSONObject("data").getString("jobId");
+        PptMasterJobContext ctx = new PptMasterJobContext();
+        ctx.title = jsonObject.getString("title") != null ? jsonObject.getString("title") : jsonObject.getString("topic");
+        ctx.docName = jsonObject.getString("doc_name") != null ? jsonObject.getString("doc_name") : ctx.title;
+        ctx.oprStaff = jsonObject.getString("user");
+        pptMasterJobs.put(jobId, ctx);
+
+        JSONObject result = new JSONObject();
+        result.put("code", "0000");
+        result.put("msg", "ppt-master 已提交");
+        JSONObject data = new JSONObject();
+        data.put("jobId", jobId);
+        result.put("data", data);
+        return result;
+    }
+
+    @Override
+    public JSONObject getPptMasterStatus(String jobId) throws Exception {
+        JSONObject getPpt = callPythonService.callPptMasterStatus(jobId);
+        log.info("调用python接口返回结果：" + getPpt);
+        if (getPpt == null || !"0000".equals(getPpt.getString("code"))) {
+            return pptMasterError(getPpt);
+        }
+        JSONObject job = getPpt.getJSONObject("data");
+        String status = job.getString("status");
+
+        JSONObject result = new JSONObject();
+        result.put("code", "0000");
+        JSONObject resultData = new JSONObject();
+        resultData.put("status", status);
+        resultData.put("progress", job.get("progress"));
+
+        if ("failed".equals(status)) {
+            resultData.put("msg", job.getString("error"));
+        } else if ("success".equals(status)) {
+            JSONObject data = job.getJSONObject("result");
+            String pptUrl = data.getString("pptUrl");
+            String recordDesc = data.getString("recordDesc");
+            String summary = data.getString("summary");
+
+            PptMasterJobContext ctx = pptMasterJobs.get(jobId);
+            if (ctx != null) {
+                synchronized (ctx) {
+                    if (ctx.pptId == null) {
+                        JSONObject persisted = persistPptMaster(pptUrl, recordDesc, ctx.title, ctx.docName, ctx.oprStaff);
+                        ctx.pptId = persisted.getString("pptId");
+                        ctx.copywriteId = persisted.getString("copywriteId");
+                    }
+                }
+                resultData.put("pptId", ctx.pptId);
+                resultData.put("copywriteId", ctx.copywriteId);
+            }
+            resultData.put("pptUrl", pptUrl);
+            resultData.put("recordDesc", recordDesc);
+            resultData.put("summary", summary);
+        }
+        result.put("data", resultData);
+        return result;
+    }
+
+    private JSONObject pptMasterError(JSONObject getPpt) {
+        JSONObject errorResult = new JSONObject();
+        errorResult.put("code", "9999");
+        String errMsg = getPpt != null ? getPpt.getString("msg") : "ppt-master 生成服务无响应";
+        errorResult.put("msg", errMsg == null ? "ppt-master 生成失败" : errMsg);
+        return errorResult;
+    }
+
+    private JSONObject buildPptMasterResult(JSONObject req, JSONObject data) {
         String pptUrl = data.getString("pptUrl");
         String recordDesc = data.getString("recordDesc");
-        String title = jsonObject.getString("title") != null ? jsonObject.getString("title") : jsonObject.getString("topic");
-        String docName = jsonObject.getString("doc_name") != null ? jsonObject.getString("doc_name") : title;
+        String title = req.getString("title") != null ? req.getString("title") : req.getString("topic");
+        String docName = req.getString("doc_name") != null ? req.getString("doc_name") : title;
+        String oprStaffId = req.getString("user");
+        JSONObject persisted = persistPptMaster(pptUrl, recordDesc, title, docName, oprStaffId);
+
+        JSONObject result = new JSONObject();
+        result.put("code", "0000");
+        result.put("msg", "ppt-master 生成成功");
+        JSONObject resultData = new JSONObject();
+        resultData.put("pptId", persisted.getString("pptId"));
+        resultData.put("copywriteId", persisted.getString("copywriteId"));
+        resultData.put("pptUrl", pptUrl);
+        resultData.put("recordDesc", recordDesc);
+        resultData.put("summary", data.getString("summary"));
+        result.put("data", resultData);
+        return result;
+    }
+
+    private JSONObject persistPptMaster(String pptUrl, String recordDesc, String title, String docName, String oprStaffId) {
         // ppt-master 一键直出，无正文/大纲，文案主表内容用主题占位
         String copywriteId = copywritingManagementService.copywritingCreate(docName, title, title, oprStaffId);
         String pptId = copywritingManagementService.copywritingCreatePPT(copywriteId, pptUrl, recordDesc, oprStaffId);
@@ -238,17 +336,10 @@ public class AiDhPptServiceImpl implements AiDhPptService {
             log.error("ppt-master 生成图片异常", e);
         }
 
-        JSONObject result = new JSONObject();
-        result.put("code", "0000");
-        result.put("msg", "ppt-master 生成成功");
-        JSONObject resultData = new JSONObject();
-        resultData.put("pptId", pptId);
-        resultData.put("copywriteId", copywriteId);
-        resultData.put("pptUrl", pptUrl);
-        resultData.put("recordDesc", recordDesc);
-        resultData.put("summary", data.getString("summary"));
-        result.put("data", resultData);
-        return result;
+        JSONObject persisted = new JSONObject();
+        persisted.put("pptId", pptId);
+        persisted.put("copywriteId", copywriteId);
+        return persisted;
     }
 
     @Override

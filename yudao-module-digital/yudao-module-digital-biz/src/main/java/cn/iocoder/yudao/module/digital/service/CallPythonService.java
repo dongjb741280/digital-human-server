@@ -103,6 +103,24 @@ public class CallPythonService {
     }
 
     /**
+     * 查询 ppt-master 异步任务状态
+     */
+    public JSONObject callPptMasterStatus(String jobId) {
+        JSONObject result = null;
+        String url = digitalAbilityConfig.getAbigetpptUrl() + "/generate_ppt_master/status/" + jobId;
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=UTF-8");
+        headers.put("Accept", "application/json");
+        try {
+            String s = AbilityShareClient.doGet(url, headers);
+            result = JSONObject.parseObject(s);
+        } catch (Exception e) {
+            log.error("callPptMasterStatus:{}", e);
+        }
+        return result;
+    }
+
+    /**
      * 异步处理 ppt 转图片
      * @param request
      * @return

@@ -180,6 +180,46 @@ public class AiDhPptController {
     }
 
     /**
+     * ppt-master 异步提交（入队后台生成，立即返回 jobId）
+     */
+    @PostMapping("/generate_ppt_master/submit")
+    @Operation(summary = "ppt-master 异步提交")
+    public CommonResult<JSONObject> submitPptMaster(@RequestBody JSONObject reqParam) {
+        log.info("submitPptMaster 提交方法：" + reqParam);
+        try {
+            JSONObject result = aiDhPptService.submitPptMaster(reqParam);
+            if (result != null && "0000".equals(result.getString("code"))) {
+                return success(result.getJSONObject("data"));
+            }
+            return CommonResult.error(GlobalErrorCodeConstants.UNKNOWN.getCode(),
+                    result != null ? result.getString("msg") : "提交失败");
+        } catch (Exception e) {
+            log.info("调用 submitPptMaster error：" + e.getMessage());
+            return error(GlobalErrorCodeConstants.UNKNOWN);
+        }
+    }
+
+    /**
+     * ppt-master 任务状态查询（queued/running/success/failed）
+     */
+    @GetMapping("/generate_ppt_master/status/{jobId}")
+    @Operation(summary = "ppt-master 任务状态")
+    public CommonResult<JSONObject> getPptMasterStatus(@PathVariable("jobId") String jobId) {
+        log.info("getPptMasterStatus 查询任务：" + jobId);
+        try {
+            JSONObject result = aiDhPptService.getPptMasterStatus(jobId);
+            if (result != null && "0000".equals(result.getString("code"))) {
+                return success(result.getJSONObject("data"));
+            }
+            return CommonResult.error(GlobalErrorCodeConstants.UNKNOWN.getCode(),
+                    result != null ? result.getString("msg") : "查询失败");
+        } catch (Exception e) {
+            log.info("调用 getPptMasterStatus error：" + e.getMessage());
+            return error(GlobalErrorCodeConstants.UNKNOWN);
+        }
+    }
+
+    /**
      * 保存 PPT 编辑结果（每页 fabric 画布 JSON）
      */
     @PostMapping("/save_ppt_edit")

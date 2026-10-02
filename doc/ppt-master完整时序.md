@@ -10,7 +10,7 @@
 
 ppt-master 是区别于「9 版式 python-pptx 一键生成」（`generate_ppt`，见 [`PPT制作完整时序.md`](./PPT制作完整时序.md)）的另一条**高质量 PPT 路线**：**LLM 当大脑 + 引擎脚本当手脚**，把主题/素材/模板交给 Claude 的 tool-use 循环，逐页手写 SVG，再由 `svg_to_pptx` 导出成**原生可编辑 .pptx**（含真实母版/版式 `p:sldMaster`/`p:sldLayout`）。
 
-整条链路一次同步调用完成（无提纲/正文分步）：**前端 `ppt-master.vue` 一键生成 → Java 转发 Python → Claude tool-use 生成 .pptx 上传 MinIO → Java 落库 + LibreOffice 出预览图**。
+整条链路**推荐异步**（无提纲/正文分步）：**前端 `ppt-master.vue` 提交 → Java 转发 Python 入队 → Claude tool-use 生成 .pptx 上传 MinIO → 前端轮询状态 → 完成后 Java 落库 + LibreOffice 出预览图**。同步接口 `generate_ppt_master` 保留（内部仍阻塞），但前端已切到异步 submit + status。
 
 > 设计细节（引擎侧软沙箱、接口契约、成本、安全）见 `digital-human-engine` 仓库（本仓库外兄弟项目）的 `docs/api-service-design.md`。
 
@@ -39,46 +39,66 @@ sequenceDiagram
     participant MIO as MinIO
     participant LO as LibreOffice
 
-    FE->>BE: POST /aiDhPpt/generate_ppt_master (title/pages/lang/canvas/images/sources/template)
-    BE->>ORCH: POST /generate_ppt_master（长超时 900s，同步阻塞）
+    FE->>BE: POST /aiDhPpt/generate_ppt_master/submit (title/pages/lang/canvas/images/sources/template)
+    BE->>ORCH: POST /generate_ppt_master/submit（入队，立即返回）
+    ORCH-->>BE: {jobId}
+    BE-->>FE: {jobId}
+
+    Note over ORCH,LLM: 后台线程生成（异步）
     loop tool-use 循环（最多 300 轮）
         ORCH->>LLM: Anthropic /v1/messages（stream + thinking adaptive）
-        LLM-->>ORCH: 工具调用（bash / read_file / write_file）
+        LLM-->>ORCH: 工具调用（bash / read_file / write_file / web_search / web_fetch）
         ORCH->>ORCH: 执行引擎脚本：project_manager.py / svg_quality_checker.py / svg_to_pptx.py
     end
     ORCH->>MIO: 上传 copywriting/pptmaster_<ts>/pptmaster_<ts>.pptx
-    ORCH-->>BE: {pptUrl, recordDesc, summary, usage}
+    Note over ORCH: 任务状态 → success
+
+    loop 前端轮询（每 3s）
+        FE->>BE: GET /aiDhPpt/generate_ppt_master/status/{jobId}
+        BE->>ORCH: GET /generate_ppt_master/status/{jobId}
+        ORCH-->>BE: {status, result}
+        BE-->>FE: {status, progress}
+    end
+
+    Note over BE,DB: 首次拿到 success 时落库（幂等）
     BE->>DB: INSERT 文案主表 + PPT 记录
     BE->>MIO: 下载 .pptx
     BE->>LO: soffice → PDF → PDFBox 逐页 PNG
     BE->>MIO: 上传每页 PNG 预览
     BE->>DB: INSERT 每页明细（ppt_image_url=预览图，语义/编辑态置空）
-    BE-->>FE: {pptId, copywriteId, pptUrl, recordDesc, summary}
+    BE-->>FE: {status: success, pptId, copywriteId, pptUrl, summary}
     FE->>BE: POST /copyWritManage/downloadPPT (id=pptId) 下载 .pptx
 ```
 
 ## 4. 各步骤详细说明
 
-### ① 一键生成 ppt-master = generate_ppt_master
+### ① 异步提交 = submit_ppt_master
 
-- 接口：`POST /digital-api/system/aiDhPpt/generate_ppt_master`（controller `AiDhPptController`，service `AiDhPptServiceImpl.generatePptMaster`）
-- 入参：`title`（主题，必填）、`pages`（4~30，默认 8）、`lang`（`zh-CN`/`en`）、`canvas`（`ppt169`/`ppt43`）、`images`（`none`/`web`）、`sources`（本地路径或 URL 列表，可空）、`template`（模板工作区根，可空）、`doc_name`、`user`
-- 转发：`CallPythonService.callToPPtPythonPostLong()` → **长超时 900s**（`AbilityShareClient.doPostPPtLong`）。ppt-master 是分钟级串行生成，普通 `doPostPPt`（300s）会超时。
-- Python：`app.py:/generate_ppt_master` → `services/ppt_master.py:generate_deck()`
-  - 门禁：`PPT_MASTER_ENABLED=1` 才启用，否则返回 `code=9999`。
-  - Claude tool-use 循环：工具 `bash`/`read_file`/`write_file`，最多 300 轮，`bash` 命令白名单 + read/write 路径沙箱（软沙箱，非 OS 级）。
-  - 产出：`projects/pptmaster_<ts>_*/exports/*.pptx` → 上传 `copywriting/pptmaster_<ts>/pptmaster_<ts>.pptx`。
-  - 返回 `{pptUrl, recordDesc, summary, usage}`。
-- 后端 `AiDhPptServiceImpl.generatePptMaster`：
-  1. `copywritingCreate()` 落文案主表（内容用主题占位，ppt-master 无正文）→ `copywriteId`；
-  2. `copywritingCreatePPT()` 落 PPT 记录 → `pptId`；
-  3. `renderPptToImages(pptUrl, pptId)`：soffice→PDF→PDFBox 逐页 PNG（**失败不阻断主产物，仅记日志**）；
-  4. 逐页 `insertPptRecordDetail()` 落明细（`ppt_image_url` 存预览图，`ppt_slide_content`/`ppt_slide_elements` 置空）。
-- 返回 `{pptId, copywriteId, pptUrl, recordDesc, summary}`。
+- 接口：`POST /digital-api/system/aiDhPpt/generate_ppt_master/submit`（controller `AiDhPptController`，service `AiDhPptServiceImpl.submitPptMaster`）
+- 入参：同同步版（`title`/`pages`/`lang`/`canvas`/`images`/`sources`/`template`/`doc_name`/`user`）。
+- 转发：`CallPythonService.callToPPtPythonPost()` → Python `POST /generate_ppt_master/submit`（入队，立即返回）。
+- Python：入队内存任务队列（`threading.Thread` 后台跑 `_generate_ppt_master_body`），返回 `{jobId}`。
+- 后端缓存 `jobId -> {title, docName, oprStaff}` 上下文（`ConcurrentHashMap`），供完成后幂等落库。
 
-### ② 下载 .pptx
+### ② 状态轮询 = get_ppt_master_status
+
+- 接口：`GET /digital-api/system/aiDhPpt/generate_ppt_master/status/{jobId}`（controller `AiDhPptController`，service `AiDhPptServiceImpl.getPptMasterStatus`）
+- 转发：`CallPythonService.callPptMasterStatus(jobId)` → Python `GET /generate_ppt_master/status/{jobId}`。
+- 返回 `{status: queued|running|success|failed, progress: {turn}, result, error}`。
+- 首次拿到 `success` 时（幂等，`synchronized` 去重）执行与同步版相同的落库：`copywritingCreate` → `copywritingCreatePPT` → `renderPptToImages` → 逐页 `insertPptRecordDetail`，然后返回 `{pptId, copywriteId, pptUrl, recordDesc, summary}`。
+
+### ③ 下载 .pptx
 
 - 前端 `ppt-master.vue` 拿到 `pptId` 后调 `POST /copyWritManage/downloadPPT`（`{id: pptId}`），复用文案管理的下载链路，从 MinIO 取 `.pptx` 返回前端 `download.pptx` 保存。
+
+### ④ 同步接口（保留）= generate_ppt_master
+
+- 接口：`POST /digital-api/system/aiDhPpt/generate_ppt_master`（service `AiDhPptServiceImpl.generatePptMaster`）
+- 转发：`callToPPtPythonPostLong()` → Python `POST /generate_ppt_master`（长超时 900s，同步阻塞）。
+- Python：`app.py:/generate_ppt_master` → `services/ppt_master.py:generate_deck()`（与异步走同一核心 `_generate_ppt_master_body`），返回 `{pptUrl, recordDesc, summary, usage}`。
+- 后端同步落库并返回 `{pptId, copywriteId, pptUrl, recordDesc, summary}`。前端已切到异步，此接口保留给其他调用方/调试。
+
+> 核心参数与工具：`title`（必填）、`pages`（4~30）、`lang`、`canvas`、`images`（none/web）、`sources`（可空）、`template`（可空）；引擎工具 `bash`/`read_file`/`write_file`/`web_search`/`web_fetch`（软沙箱，非 OS 级）；产出 `projects/pptmaster_<ts>_*/exports/*.pptx` → MinIO。
 
 ## 5. 数据表
 
@@ -99,7 +119,8 @@ sequenceDiagram
 
 ## 7. 关键点
 
-- **同步阻塞**：整条链路一次 HTTP 调用完成，分钟级；前端 `timeout:0` 无限等，Java→Python 900s 超时。
+- **异步优先**：前端 submit → 轮询 status（每 3s）→ success 后下载；任务队列为内存态（Python 单进程 `threading`），重启丢任务，适合内网/单实例。同步接口保留，内部走同一核心。
+- **幂等落库**：Java 在首次拿到 `success` 时落库（`synchronized` + 内存 `ConcurrentHashMap` 去重），重复轮询不重复落库；Java 重启会丢该缓存，但不影响已落库结果。
 - **两条 PPT 路线并存**：`generate_ppt`（9 版式 python-pptx，可细编辑）与 `generate_ppt_master`（SVG→svg_to_pptx 原生可编辑 + 母版/版式），互不替换。
 - **软沙箱非生产隔离**：引擎 `bash` 工具仍 `shell=True`，白名单是进程内字符串过滤；只建议可信内网开启（`PPT_MASTER_ENABLED=1`），不对公网开放。
 - **预览图复用**：与 `generate_ppt` 同一套 `renderPptToImages`（LibreOffice），保证预览与 .pptx 版式一致。
