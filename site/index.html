@@ -56,30 +56,19 @@
           </ul>
         </div>
         <div class="hero-visual">
-          <div class="console" aria-hidden="true">
+          <div class="console">
             <div class="console-bar">
               <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
               <span class="console-title">数字人视频创作</span>
             </div>
             <div class="console-body">
               <div class="console-preview">
-                <svg class="avatar" viewBox="0 0 200 200">
-                  <defs>
-                    <linearGradient id="av" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0" stop-color="#818cf8"/><stop offset="1" stop-color="#22d3ee"/>
-                    </linearGradient>
-                  </defs>
-                  <circle cx="100" cy="100" r="92" fill="url(#av)" opacity="0.18"/>
-                  <circle cx="100" cy="100" r="92" fill="none" stroke="url(#av)" stroke-width="2" opacity="0.5"/>
-                  <circle cx="100" cy="80" r="30" fill="url(#av)"/>
-                  <path d="M46 176c6-36 26-54 54-54s48 18 54 54" fill="url(#av)"/>
-                </svg>
-                <div class="console-badge">
-                  <span class="pulse"></span> 生成中 78%
-                </div>
-                <div class="wave">
-                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                </div>
+                <video class="hero-video" controls playsinline preload="metadata"
+                       poster="demo/digital-human-demo-poster.jpg"
+                       aria-label="数字人视频演示">
+                  <source src="demo/digital-human-demo.mp4" type="video/mp4">
+                  你的浏览器不支持 HTML5 视频播放。
+                </video>
               </div>
               <div class="console-timeline">
                 <span class="seg seg-done"></span><span class="seg seg-done"></span><span class="seg seg-done"></span><span class="seg seg-active"></span><span class="seg"></span><span class="seg"></span>

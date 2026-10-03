@@ -1,6 +1,20 @@
 # digital-human-server
 
+[English](./README_EN.md) | 简体中文
+
+[![License](https://img.shields.io/github/license/dongjb741280/digital-human-server)](./LICENSE)
+![Java](https://img.shields.io/badge/Java-11-007396)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7.18-6DB33F)
+
+> 前端仓库：[digital-human-web](https://github.com/dongjb741280/digital-human-web) ｜ AI 引擎：[digital-human-engine](https://github.com/dongjb741280/digital-human-engine)
+
 数字人平台服务端。基于 [yudao-cloud](https://github.com/YunaiV/ruoyi-vue-pro)（Spring Cloud 微服务架构）改造，在标准的系统管理 / 基础设施模块之上，新增 **数字人业务模块** `yudao-module-digital`，提供数字人形象复刻、声音复刻、文案创作、视频创作、AI 智能体互动等能力。
+
+## 效果演示
+
+[![数字人视频演示](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/digital-human-demo-poster.jpg)](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/digital-human-demo.mp4)
+
+> 点击上方预览图直接播放演示视频。在线官网：[https://dongjb741280.github.io/digital-human-server/](https://dongjb741280.github.io/digital-human-server/)
 
 ## 核心功能
 
@@ -121,9 +135,9 @@
 
 ## 相关项目
 
-- **digital-human-web**：数字人平台前端（本仓库外的兄弟项目）
-- **digital-human-engine**：Python AI 编排服务
-- **GPT-SoVITS / Wav2Lip / MuseTalk**：第三方 AI 引擎
+- [digital-human-web](https://github.com/dongjb741280/digital-human-web)：数字人平台前端
+- [digital-human-engine](https://github.com/dongjb741280/digital-human-engine)：Python AI 编排服务
+- [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS) / [Wav2Lip](https://github.com/Rudrabha/Wav2Lip) / [MuseTalk](https://github.com/TMElyralab/MuseTalk)：第三方 AI 引擎
 
 ## 开源协议
 
