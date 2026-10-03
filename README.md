@@ -10,6 +10,7 @@
 | 声音复刻（Voice Clone） | 基于 `GPT-SoVITS` 的 zero-shot 零样本声音克隆 |
 | 文案创作（Copywriting） | 基于 LLM 生成提纲 / 正文 / PPT（`python-pptx` + `Pillow` 出图） |
 | PPT 创作（ppt-master） | 一键直出原生可编辑 `.pptx`（Claude tool-use → SVG → 母版/版式） |
+| PPT 在线编辑（Collabora） | 基于 WOPI 协议接入 Collabora Online，浏览器里直接编辑 `.pptx`，编辑后重渲染预览图 + 重新提取 speaker notes |
 | 视频创作（Video） | 7 步流水线：TTS → 裁剪分段 → 口型合成 → 图层合成 → 合并 → 首帧 → 字幕 |
 | 背景 / 素材管理 | 视频图层素材库（背景图 / 背景视频 / 前景装饰） |
 | AI 智能体 / 实时互动 | 智能体列表、话术对练、流程编排、数字人实时互动（SSE 流式） |
@@ -114,6 +115,7 @@
 - [文案创作完整时序](./doc/文案创作完整时序.md)
 - [PPT 制作完整时序](./doc/PPT制作完整时序.md)
 - [ppt-master 完整时序](./doc/ppt-master完整时序.md)
+- [PPT 在线编辑完整时序](./doc/PPT在线编辑完整时序.md)
 - [视频创作完整时序](./doc/视频创作完整时序.md)
 - [背景素材管理](./doc/背景素材管理.md)
 
