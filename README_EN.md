@@ -6,7 +6,7 @@ A digital human platform backend. Built on [yudao-cloud](https://github.com/Yuna
 
 ## Demo
 
-[![Digital human demo](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/digital-human-demo-poster.jpg)](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/digital-human-demo.mp4)
+[![Digital human demo](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/digital-human-demo-poster.jpg)](https://dongjb741280.github.io/digital-human-server/demo/digital-human-demo.mp4)
 
 > Click the preview above to play the demo video. Website: [https://dongjb741280.github.io/digital-human-server/](https://dongjb741280.github.io/digital-human-server/)
 
