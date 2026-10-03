@@ -115,7 +115,7 @@ img { max-width: 100%; display: block; }
 .btn-ghost-dark { color: #fff; border: 1px solid rgba(255, 255, 255, 0.26); }
 
 /* Hero 控制台 mock */
-.hero-visual { position: relative; }
+.hero-visual { position: relative; max-width: 320px; margin: 0 auto; }
 .console {
   background: linear-gradient(180deg, rgba(30, 27, 75, 0.7), rgba(15, 18, 38, 0.85));
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -130,7 +130,7 @@ img { max-width: 100%; display: block; }
 .console-body { padding: 22px; }
 .console-preview {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 9 / 16;
   border-radius: 12px;
   background: radial-gradient(120% 120% at 50% 0%, #1e1b4b 0%, #0f1230 100%);
   display: flex; align-items: center; justify-content: center;
@@ -271,7 +271,6 @@ img { max-width: 100%; display: block; }
 /* ---------- 响应式 ---------- */
 @media (max-width: 960px) {
   .hero-inner { grid-template-columns: 1fr; gap: 48px; }
-  .hero-visual { max-width: 560px; }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 > :last-child:nth-child(3n + 1) { grid-column: auto; }
   .workflow { grid-template-columns: 1fr; }
