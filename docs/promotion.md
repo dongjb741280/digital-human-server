@@ -57,12 +57,12 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    A[① 文字转语音<br/>TTS] --> B[② 裁剪分段<br/>split]
-    B --> C[③ 对嘴型<br/>lipsync]
-    C --> D[④ 图层合成<br/>composite]
-    D --> E[⑤ 合并<br/>merge]
-    E --> F[⑥ 提取首帧<br/>first frame]
-    F --> G[⑦ 加字幕<br/>captions]
+    A[文字转语音<br/>TTS] --> B[裁剪分段<br/>split]
+    B --> C[对嘴型<br/>lipsync]
+    C --> D[图层合成<br/>composite]
+    D --> E[合并<br/>merge]
+    E --> F[提取首帧<br/>first frame]
+    F --> G[加字幕<br/>captions]
 ```
 
 1. **文字转语音** —— 每页文案 → GPT-SoVITS 合成语音
