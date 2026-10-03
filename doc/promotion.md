@@ -30,7 +30,7 @@
 
 所以我把系统拆成两层：
 
-![架构图](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/docs/assets/architecture.png)
+![架构图](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/doc/assets/architecture.png)
 
 - **Java 侧**负责把「制作视频」拆成 7 个串行步骤写进执行日志，逐步调 Python，再**靠 Python 回调推进下一步**。
 - **Python 侧**只做推理，做完上传 MinIO、回调 Java 更新状态。
@@ -41,7 +41,7 @@
 
 视频创作是「数字人在 PPT 画面上照着文案逐页说话」。后端把一次制作拆成 7 步：
 
-![7 步流水线](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/docs/assets/pipeline.png)
+![7 步流水线](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/doc/assets/pipeline.png)
 
 1. **文字转语音** —— 每页文案 → GPT-SoVITS 合成语音
 2. **裁剪分段** —— 参考数字人视频按每段语音时长循环/裁剪
