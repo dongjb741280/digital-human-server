@@ -12,7 +12,11 @@
 
 ## 效果演示
 
-[![数字人视频演示](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/digital-human-demo-poster.jpg)](https://dongjb741280.github.io/digital-human-server/demo/digital-human-demo.mp4)
+<p align="center">
+  <a href="https://dongjb741280.github.io/digital-human-server/demo/digital-human-demo.mp4">
+    <img src="https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/digital-human-demo-poster.jpg" width="320" alt="数字人视频演示">
+  </a>
+</p>
 
 > 点击上方预览图直接播放演示视频。在线官网：[https://dongjb741280.github.io/digital-human-server/](https://dongjb741280.github.io/digital-human-server/)
 
