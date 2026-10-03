@@ -30,21 +30,7 @@
 
 所以我把系统拆成两层：
 
-```mermaid
-flowchart TB
-    FE[Web 前端<br/>digital-human-web] --> GW[网关 Gateway :48080]
-    GW --> SYS[系统服务 System :48081]
-    GW --> INF[基础设施 Infra :48082]
-    GW --> DIG[数字人业务 Digital :48083]
-
-    DIG <-->|调用 / 回调| ORCH[Python 编排<br/>digital-human-engine :60013]
-    ORCH --> GSV[GPT-SoVITS :9880<br/>TTS 推理]
-    ORCH --> LIP[Wav2Lip / MuseTalk<br/>口型合成]
-    ORCH --> REM[rembg<br/>抠像]
-
-    DIG --> MYSQL[(MySQL)]
-    ORCH <--> MINIO[(MinIO<br/>aidigital bucket)]
-```
+![架构图](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/docs/assets/architecture.png)
 
 - **Java 侧**负责把「制作视频」拆成 7 个串行步骤写进执行日志，逐步调 Python，再**靠 Python 回调推进下一步**。
 - **Python 侧**只做推理，做完上传 MinIO、回调 Java 更新状态。
@@ -55,15 +41,7 @@ flowchart TB
 
 视频创作是「数字人在 PPT 画面上照着文案逐页说话」。后端把一次制作拆成 7 步：
 
-```mermaid
-flowchart LR
-    A[文字转语音<br/>TTS] --> B[裁剪分段<br/>split]
-    B --> C[对嘴型<br/>lipsync]
-    C --> D[图层合成<br/>composite]
-    D --> E[合并<br/>merge]
-    E --> F[提取首帧<br/>first frame]
-    F --> G[加字幕<br/>captions]
-```
+![7 步流水线](https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/docs/assets/pipeline.png)
 
 1. **文字转语音** —— 每页文案 → GPT-SoVITS 合成语音
 2. **裁剪分段** —— 参考数字人视频按每段语音时长循环/裁剪
