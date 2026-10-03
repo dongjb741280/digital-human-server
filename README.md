@@ -123,19 +123,19 @@
 | GPT-SoVITS `api_v2` | 9880 | 声音复刻 / 视频配音的 TTS 推理 |
 | Wav2Lip / MuseTalk | - | 数字人口型合成 |
 
-部署细节见 [`doc/声音复刻完整时序.md`](./doc/声音复刻完整时序.md)、[`doc/形象复刻完整时序.md`](./doc/形象复刻完整时序.md)。
+部署细节见 [`doc/voice-clone-sequence.md`](./doc/voice-clone-sequence.md)、[`doc/avatar-clone-sequence.md`](./doc/avatar-clone-sequence.md)。
 
 ## 相关文档
 
-- [MinIO 存储规划](./doc/MinIO%20存储规划.md)
-- [形象复刻完整时序](./doc/形象复刻完整时序.md)
-- [声音复刻完整时序](./doc/声音复刻完整时序.md)
-- [文案创作完整时序](./doc/文案创作完整时序.md)
-- [PPT 制作完整时序](./doc/PPT制作完整时序.md)
-- [ppt-master 完整时序](./doc/ppt-master完整时序.md)
-- [PPT 在线编辑完整时序](./doc/PPT在线编辑完整时序.md)
-- [视频创作完整时序](./doc/视频创作完整时序.md)
-- [背景素材管理](./doc/背景素材管理.md)
+- [MinIO 存储规划](./doc/minio-storage.md)
+- [形象复刻完整时序](./doc/avatar-clone-sequence.md)
+- [声音复刻完整时序](./doc/voice-clone-sequence.md)
+- [文案创作完整时序](./doc/copywriting-sequence.md)
+- [PPT 制作完整时序](./doc/ppt-creation-sequence.md)
+- [ppt-master 完整时序](./doc/ppt-master-sequence.md)
+- [PPT 在线编辑完整时序](./doc/ppt-online-editing-sequence.md)
+- [视频创作完整时序](./doc/video-creation-sequence.md)
+- [背景素材管理](./doc/background-asset-management.md)
 
 ## 相关项目
 

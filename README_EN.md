@@ -115,15 +115,15 @@ Avatar / voice cloning, video creation, and copywriting require the **Python AI 
 
 ## Related Docs
 
-- [MinIO Storage Plan](./doc/MinIO%20存储规划.md)
-- [Avatar Clone Sequence](./doc/形象复刻完整时序.md)
-- [Voice Clone Sequence](./doc/声音复刻完整时序.md)
-- [Copywriting Sequence](./doc/文案创作完整时序.md)
-- [PPT Creation Sequence](./doc/PPT制作完整时序.md)
-- [ppt-master Sequence](./doc/ppt-master完整时序.md)
-- [PPT Online Editing Sequence](./doc/PPT在线编辑完整时序.md)
-- [Video Creation Sequence](./doc/视频创作完整时序.md)
-- [Background Asset Management](./doc/背景素材管理.md)
+- [MinIO Storage Plan](./doc/minio-storage.md)
+- [Avatar Clone Sequence](./doc/avatar-clone-sequence.md)
+- [Voice Clone Sequence](./doc/voice-clone-sequence.md)
+- [Copywriting Sequence](./doc/copywriting-sequence.md)
+- [PPT Creation Sequence](./doc/ppt-creation-sequence.md)
+- [ppt-master Sequence](./doc/ppt-master-sequence.md)
+- [PPT Online Editing Sequence](./doc/ppt-online-editing-sequence.md)
+- [Video Creation Sequence](./doc/video-creation-sequence.md)
+- [Background Asset Management](./doc/background-asset-management.md)
 
 ## Related Projects
 

@@ -45,7 +45,7 @@
 
 ## 3. 存储路径
 
-遵循 MinIO 统一规划（见 [MinIO 存储规划.md](./MinIO 存储规划.md)），背景/素材统一放在 `asset/` 下：
+遵循 MinIO 统一规划（见 [minio-storage.md](./minio-storage.md)），背景/素材统一放在 `asset/` 下：
 
 ```
 asset/background/{fileName}   # 背景图/背景视频

@@ -8,7 +8,7 @@
 
 ## 1. 概述
 
-ppt-master 是区别于「9 版式 python-pptx 一键生成」（`generate_ppt`，见 [`PPT制作完整时序.md`](./PPT制作完整时序.md)）的另一条**高质量 PPT 路线**：**LLM 当大脑 + 引擎脚本当手脚**，把主题/素材/模板交给 Claude 的 tool-use 循环，逐页手写 SVG，再由 `svg_to_pptx` 导出成**原生可编辑 .pptx**（含真实母版/版式 `p:sldMaster`/`p:sldLayout`）。
+ppt-master 是区别于「9 版式 python-pptx 一键生成」（`generate_ppt`，见 [`ppt-creation-sequence.md`](./ppt-creation-sequence.md)）的另一条**高质量 PPT 路线**：**LLM 当大脑 + 引擎脚本当手脚**，把主题/素材/模板交给 Claude 的 tool-use 循环，逐页手写 SVG，再由 `svg_to_pptx` 导出成**原生可编辑 .pptx**（含真实母版/版式 `p:sldMaster`/`p:sldLayout`）。
 
 整条链路**推荐异步**（无提纲/正文分步）：**前端 `ppt-master.vue` 提交 → Java 转发 Python 入队 → Claude tool-use 生成 .pptx 上传 MinIO → 前端轮询状态 → 完成后 Java 落库 + LibreOffice 出预览图**。同步接口 `generate_ppt_master` 保留（内部仍阻塞），但前端已切到异步 submit + status。
 

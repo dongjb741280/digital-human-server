@@ -256,7 +256,7 @@ flowchart TB
 
 - 编排服务 `digital-human-engine` 与「声音复刻/形象复刻/文案创作」共用，端口 60013。
 - 语音合成走 GPT-SoVITS（9880），Python `/tts` 透传参数、失败回退 edge-tts。
-- 口型合成见 `形象复刻完整时序.md §7.2`（Wav2Lip CPU 部署 / MuseTalk GPU）。
+- 口型合成见 `avatar-clone-sequence.md §7.2`（Wav2Lip CPU 部署 / MuseTalk GPU）。
 - 视频处理的 ffmpeg 操作（循环、合成、合并、首帧、字幕）都在 `services/video.py` 内用 subprocess 调 ffmpeg。
 
 ## 8. 故障排查 FAQ
@@ -291,7 +291,7 @@ flowchart TB
 
 **原因**：`LIPSYNC_MODEL=passthrough` 只把语音贴到视频上，没做口型合成。
 
-**解决**：切 `LIPSYNC_MODEL=wav2lip`（CPU，慢，见 `形象复刻完整时序.md §7.2`）或 `LIPSYNC_MODEL=musetalk`（GPU）。
+**解决**：切 `LIPSYNC_MODEL=wav2lip`（CPU，慢，见 `avatar-clone-sequence.md §7.2`）或 `LIPSYNC_MODEL=musetalk`（GPU）。
 
 ### 8.5 数字人是整块矩形（带背景）
 
