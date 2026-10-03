@@ -29,6 +29,10 @@ public interface AiDhPptService {
 
     JSONObject regeneratePpt(JSONObject jsonObject) throws Exception;
 
+    JSONObject openEdit(JSONObject jsonObject) throws Exception;
+
+    JSONObject renderPreview(JSONObject jsonObject) throws Exception;
+
     JSONObject generateOutline(JSONObject jsonObject) throws Exception;
 
     JSONObject pilgrimage(JSONObject jsonObject) throws Exception;

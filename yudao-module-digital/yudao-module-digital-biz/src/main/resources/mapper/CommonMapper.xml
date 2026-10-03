@@ -43,6 +43,11 @@
         where id = #{pptId}
     </update>
 
+    <delete id="deletePptRecordDetail" parameterType="java.util.Map">
+        delete from tb_ai_dh_copywrite_ppt_record_detail
+        where ppt_id = #{pptId}
+    </delete>
+
 
     <update id="updatePptRecordUrlAndLength" parameterType="java.util.Map">
         update tb_ai_dh_copywrite_ppt_record_detail

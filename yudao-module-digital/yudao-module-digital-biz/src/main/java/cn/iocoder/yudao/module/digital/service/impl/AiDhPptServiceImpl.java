@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.digital.service.impl;
 import cn.iocoder.yudao.module.digital.dal.AiAgentDO;
 import cn.iocoder.yudao.module.digital.dal.AiCopyWritePptRecordDO;
 import cn.iocoder.yudao.module.digital.dal.mysql.AiAgentMapper;
+import cn.iocoder.yudao.module.digital.dal.mysql.AiCopyWritePptRecordMapper;
 import cn.iocoder.yudao.module.digital.dal.mysql.CommonMapper;
 import cn.iocoder.yudao.module.digital.framework.file.core.client.s3.S3FileClient;
 import cn.iocoder.yudao.module.digital.framework.file.core.client.s3.S3FileClientConfig;
@@ -14,6 +15,7 @@ import cn.iocoder.yudao.module.digital.util.*;
 import cn.iocoder.yudao.module.digital.vo.CopywritingPptReqVO;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,8 @@ public class AiDhPptServiceImpl implements AiDhPptService {
 
     @Resource
     private AiAgentMapper aiAgentMapper;
+    @Resource
+    private AiCopyWritePptRecordMapper aiCopyWritePptRecordMapper;
 
     @Resource
     private MinioClientService minioClientService;
@@ -388,6 +392,85 @@ public class AiDhPptServiceImpl implements AiDhPptService {
         result.put("data", getPpt.getJSONObject("data"));
         return result;
     }
+    @Override
+    public JSONObject openEdit(JSONObject jsonObject) throws Exception {
+        String pptId = jsonObject.getString("pptId");
+        AiCopyWritePptRecordDO record = aiCopyWritePptRecordMapper.selectOne(
+                new LambdaQueryWrapper<AiCopyWritePptRecordDO>().eq(AiCopyWritePptRecordDO::getId, pptId));
+        if (record == null || StringUtils.isBlank(record.getPptUrl())) {
+            JSONObject errorResult = new JSONObject();
+            errorResult.put("code", "9999");
+            errorResult.put("msg", "PPT 记录不存在或缺少文件");
+            return errorResult;
+        }
+        JSONObject pyReq = new JSONObject();
+        pyReq.put("pptUrl", record.getPptUrl());
+        pyReq.put("user", jsonObject.getString("user"));
+        return callPythonService.callToPPtPythonPost(pyReq, "/ppt/open_edit");
+    }
+
+    @Override
+    public JSONObject renderPreview(JSONObject jsonObject) throws Exception {
+        String pptId = jsonObject.getString("pptId");
+        AiCopyWritePptRecordDO record = aiCopyWritePptRecordMapper.selectOne(
+                new LambdaQueryWrapper<AiCopyWritePptRecordDO>().eq(AiCopyWritePptRecordDO::getId, pptId));
+        if (record == null || StringUtils.isBlank(record.getPptUrl())) {
+            JSONObject errorResult = new JSONObject();
+            errorResult.put("code", "9999");
+            errorResult.put("msg", "PPT 记录不存在或缺少文件");
+            return errorResult;
+        }
+        List<String> imageUrls = renderPptToImages(record.getPptUrl(), pptId);
+
+        // 从 .pptx 读 speaker notes（按页序），保证增删页后备注精确对应
+        List<String> notes = new ArrayList<>();
+        JSONObject notesReq = new JSONObject();
+        notesReq.put("pptUrl", record.getPptUrl());
+        JSONObject notesResp = callPythonService.callToPPtPythonPost(notesReq, "/ppt/notes");
+        if (notesResp != null && "0000".equals(notesResp.getString("code"))
+                && notesResp.getJSONObject("data") != null) {
+            JSONArray notesArr = notesResp.getJSONObject("data").getJSONArray("notes");
+            if (notesArr != null) {
+                for (int i = 0; i < notesArr.size(); i++) {
+                    notes.add(notesArr.getString(i));
+                }
+            }
+        }
+
+        // 语音/正文等内容按页码对应保留（页数变化时：多的页新增、少的页删除）
+        Map<String, Object> q = new HashMap<>();
+        q.put("mainPptId", pptId);
+        List<Map> existing = commonMapper.getPptRecordDetail(q);
+
+        Map<String, Object> del = new HashMap<>();
+        del.put("pptId", pptId);
+        commonMapper.deletePptRecordDetail(del);
+
+        String now = DateUtils.formatDate(new Date(), DateUtils.FORMAT_YYYYMMDD24HHMMSS);
+        String oprStaff = jsonObject.getString("user");
+        for (int i = 0; i < imageUrls.size(); i++) {
+            Map old = i < existing.size() ? existing.get(i) : null;
+            Map<String, Object> params = new HashMap<>();
+            params.put("pptId", pptId);
+            params.put("pptNum", i);
+            params.put("pptImageUrl", imageUrls.get(i));
+            params.put("pptImageWords", i < notes.size() ? notes.get(i) : "");
+            params.put("pptSlideContent", old == null ? "" : old.get("ppt_slide_content"));
+            params.put("pptSlideElements", old == null ? "" : old.get("ppt_slide_elements"));
+            params.put("pptVoiceUrl", old == null ? "" : old.get("ppt_voice_url"));
+            params.put("pptVoiceLength", old == null ? "" : old.get("ppt_voice_length"));
+            params.put("pptVoiceHumanUrl", old == null ? "" : old.get("ppt_voice_human_url"));
+            params.put("pptVideoImageUrl", old == null ? "" : old.get("ppt_video_image_url"));
+            params.put("oprTime", now);
+            params.put("oprStaff", oprStaff);
+            commonMapper.insertPptRecordDetail(params);
+        }
+        JSONObject result = new JSONObject();
+        result.put("code", "0000");
+        result.put("msg", "预览已重新生成");
+        return result;
+    }
+
     @Override
     public JSONObject generateOutline(JSONObject jsonObject) throws Exception {
 

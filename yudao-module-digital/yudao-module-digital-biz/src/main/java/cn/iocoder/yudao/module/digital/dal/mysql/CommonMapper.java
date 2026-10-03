@@ -21,6 +21,8 @@ public interface CommonMapper {
 
     public int updatePptRecordUrl(Map<String,Object> params);
 
+    public int deletePptRecordDetail(Map<String,Object> params);
+
     public List<Map> getVideoExecLog (Map<String,Object> params);
 
 

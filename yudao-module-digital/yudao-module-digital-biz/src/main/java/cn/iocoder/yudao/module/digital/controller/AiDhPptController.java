@@ -264,6 +264,41 @@ public class AiDhPptController {
      * @param:
      * @return: 0000成功  9999失败
      */
+    /**
+     * 在线编辑（Collabora）入口：pptId -> pptUrl -> Python /ppt/open_edit
+     */
+    @PostMapping("/open_edit")
+    @Operation(summary = "在线编辑（Collabora）入口")
+    public CommonResult<JSONObject> openEdit(@RequestBody JSONObject reqParam) {
+        try {
+            JSONObject result = aiDhPptService.openEdit(reqParam);
+            if (result != null && "0000".equals(result.getString("code"))) {
+                return success(result.getJSONObject("data"));
+            }
+            return CommonResult.error(GlobalErrorCodeConstants.UNKNOWN.getCode(),
+                    result != null ? result.getString("msg") : "打开失败");
+        } catch (Exception e) {
+            log.info("调用 openEdit error：" + e.getMessage());
+            return error(GlobalErrorCodeConstants.UNKNOWN);
+        }
+    }
+
+    @PostMapping("/render_preview")
+    @Operation(summary = "重新生成 PPT 预览图")
+    public CommonResult<Boolean> renderPreview(@RequestBody JSONObject reqParam) {
+        try {
+            JSONObject result = aiDhPptService.renderPreview(reqParam);
+            if (result != null && "0000".equals(result.getString("code"))) {
+                return success(true);
+            }
+            return CommonResult.error(GlobalErrorCodeConstants.UNKNOWN.getCode(),
+                    result != null ? result.getString("msg") : "重新生成失败");
+        } catch (Exception e) {
+            log.info("调用 renderPreview error：" + e.getMessage());
+            return error(GlobalErrorCodeConstants.UNKNOWN);
+        }
+    }
+
     @PostMapping("/pilgrimage")
     @Operation(summary = "ppt转图片接口")
     public CommonResult<JSONObject> pilgrimage(@RequestBody JSONObject reqParam) {
