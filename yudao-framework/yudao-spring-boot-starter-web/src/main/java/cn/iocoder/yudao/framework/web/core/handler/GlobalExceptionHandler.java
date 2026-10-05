@@ -14,6 +14,7 @@ import cn.iocoder.yudao.framework.web.core.util.WebFrameworkUtils;
 import cn.iocoder.yudao.module.infra.api.logger.dto.ApiErrorLogCreateReqDTO;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
@@ -210,6 +211,16 @@ public class GlobalExceptionHandler {
             log.info("[serviceExceptionHandler]", ex);
         }
         return CommonResult.error(ex.getCode(), ex.getMessage());
+    }
+
+    /**
+     * 处理客户端主动中断连接（如视频/音频流传输中，浏览器取消请求或页面跳转导致的 Broken pipe）。
+     * 此时客户端已断开，无需也无法再写响应，直接忽略，避免 defaultExceptionHandler 尝试写 JSON
+     * 时因响应 Content-Type 已被设为 video/mp4 等而抛出 "No converter ..." 的二次异常。
+     */
+    @ExceptionHandler(value = ClientAbortException.class)
+    public void clientAbortExceptionHandler(HttpServletRequest req, ClientAbortException ex) {
+        log.info("[clientAbortExceptionHandler][url({}) 客户端中断连接: {}]", req.getRequestURI(), ex.getMessage());
     }
 
     /**
