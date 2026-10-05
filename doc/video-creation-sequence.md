@@ -182,7 +182,7 @@ sequenceDiagram
 
 - Java：`videoAddCaptions`（service `:1025`）
 - Python：`app.py` 的 `add_captions`（`:264`）→ `services/video.py:add_captions`（`:91`）
-- 动作：Java 按页取 `ppt_image_words` + 每段 `ppt_voice_length` 构建字幕时间轴 `captions=[{text,start,end}]`，Python 生成 **ASS**（`PlayRes 1920x1080`、`Alignment=2` 底部居中、源文本换行合并为单行；超长字幕在 80% 屏宽内横向滚动）用 libass 烧录，输出 `video/{videoId}/{batch}/final.mp4`。
+- 动作：Java 按页取 `ppt_image_words` + 每段 `ppt_voice_length` 构建字幕时间轴 `captions=[{text,start,end}]`，Python 生成 **ASS**（`PlayRes 1920x1080`、`Alignment=2` 底部居中、源文本换行合并为单行；超长字幕只滚动超出 80% 屏宽的部分，速度与朗读时长匹配）用 libass 烧录，输出 `video/{videoId}/{batch}/final.mp4`。
 - 回调：`updateRecordVideo`（`video_type=5`）→ 写主表 `video_url=final.mp4`，全部步骤完成 → `video_status=4`。
 
 ## 5. 状态机
@@ -218,7 +218,7 @@ sequenceDiagram
   - 成片：`video/{videoId}/{batch}/final.mp4`
 - **对嘴型模型**：`config.py` 的 `LIPSYNC_MODEL`（`wav2lip` CPU / `musetalk` GPU / `passthrough` 快速占位）。
 - **数字人抠图**：裁剪用绿幕抠像视频（`avatar/{humanId}/matting/`），图层合成时 `colorkey` 去绿幕。
-- **字幕用 ASS**：`add_captions` 生成 ASS + libass 烧录，`PlayRes 1920x1080` + `Alignment=2` 底部居中 + `WrapStyle=0` 单行；超长字幕（估算宽度 > 屏宽 80%）用 `\clip`+`\move` 在 80% 区域内横向滚动，避免溢出屏幕。
+- **字幕用 ASS**：`add_captions` 生成 ASS + libass 烧录，`PlayRes 1920x1080` + `Alignment=2` 底部居中 + `WrapStyle=0` 单行；超长字幕（估算宽度 > 屏宽 80%）用 `\clip`+`\move` 在 80% 区域内只滚动超出部分（速度与朗读时长匹配），避免溢出屏幕。
 - **删除连带清理**：`deleteAiDhHumanVideo`（service `:1303`）删主表 + 图层明细 + 执行日志 + 全部 MinIO 中间产物（`deleteVideoMinioFiles` 收集各 `*_url` 字段去重后 `minioDelete`）。
 
 ## 7. 部署架构
@@ -315,7 +315,7 @@ flowchart TB
 
 **原因**：早期用 SRT + 默认样式，长文案不换行。
 
-**解决**：改用 ASS（`PlayRes 1920x1080` + `Alignment=2` 底部居中）；短字幕单行显示，超长字幕（估算宽度超过屏宽 80%）自动在 80% 区域内横向滚动（`\clip` + `\move`），不再溢出屏幕。
+**解决**：改用 ASS（`PlayRes 1920x1080` + `Alignment=2` 底部居中）；短字幕单行显示，超长字幕（估算宽度超过屏宽 80%）自动在 80% 区域内只滚动超出部分（`\clip` + `\move`，速度与朗读时长匹配），不再溢出屏幕。
 
 ### 8.8 删除视频后 MinIO 文件残留
 
