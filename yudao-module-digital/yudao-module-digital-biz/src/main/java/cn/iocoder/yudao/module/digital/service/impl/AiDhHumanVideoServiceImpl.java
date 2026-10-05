@@ -579,10 +579,10 @@ public class AiDhHumanVideoServiceImpl implements AiDhHumanVideoService {
 
 
         for(int i=0;i<pptRecordDetailList.size();i++){
-            int pptVoiceLength = Integer.parseInt(pptRecordDetailList.get(i).get("ppt_voice_length") + "");
+            int pptVoiceLength = parseIntSafe(pptRecordDetailList.get(i).get("ppt_voice_length"));
             voiceLength+= pptVoiceLength;
             pptvoiceLengths.add(pptVoiceLength);
-            pptNums.add(Integer.parseInt(pptRecordDetailList.get(i).get("model_num")+""));
+            pptNums.add(parseIntSafe(pptRecordDetailList.get(i).get("model_num")));
         }
         if(0 == voiceLength){
             try {
@@ -614,6 +614,22 @@ public class AiDhHumanVideoServiceImpl implements AiDhHumanVideoService {
         formattedDateTime = now.format(formatter);
         log.info("裁剪视频结束时间=="+formattedDateTime+"=======");
 
+    }
+
+    /** 安全解析 int：null / "null" / 空串 / 非数字均返回 0，避免 NumberFormatException。 */
+    private int parseIntSafe(Object value) {
+        if (value == null) {
+            return 0;
+        }
+        String s = value.toString().trim();
+        if (s.isEmpty() || "null".equals(s)) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     //用参考视频加给每段音频配音调用musetalk

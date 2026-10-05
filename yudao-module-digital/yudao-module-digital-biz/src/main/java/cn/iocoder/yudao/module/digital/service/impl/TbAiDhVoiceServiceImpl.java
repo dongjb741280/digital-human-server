@@ -471,7 +471,7 @@ public class TbAiDhVoiceServiceImpl implements ITbAiDhVoiceService {
         } catch (Exception e) {
             log.error("解析音频时长失败 voiceSampleUrl:{}", voiceSampleUrl, e);
         }
-        return length;
+        return "0";
     }
 
     private long readWavDurationMs(byte[] wav) {
