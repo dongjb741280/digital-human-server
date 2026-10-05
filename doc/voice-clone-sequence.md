@@ -235,6 +235,15 @@ python3 -m venv venv
    raw_audio = torch.from_numpy(raw_audio_np).unsqueeze(0)
    ```
 3. **下载 fast_langdetect 模型**（见 7.3），否则推理报 `Cache directory not found`。
+4. **安装 NLTK 英文资源**：长文本含英文词（AI/IVR/CRM/Gartner 等）时，`cut5` 分词需要 `cmudict`、`averaged_perceptron_tagger_eng`、`punkt`，缺失会报 400 `tts failed`（见 8.7）。放到 `~/nltk_data/`：
+   ```bash
+   BASE=https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages
+   mkdir -p ~/nltk_data/corpora ~/nltk_data/taggers ~/nltk_data/tokenizers
+   curl -sL $BASE/corpora/cmudict.zip -o /tmp/cmudict.zip && unzip -oq /tmp/cmudict.zip -d ~/nltk_data/corpora
+   curl -sL $BASE/taggers/averaged_perceptron_tagger_eng.zip -o /tmp/apte.zip && unzip -oq /tmp/apte.zip -d ~/nltk_data/taggers
+   curl -sL $BASE/tokenizers/punkt.zip -o /tmp/punkt.zip && unzip -oq /tmp/punkt.zip -d ~/nltk_data/tokenizers
+   ```
+   （`nltk.download()` 若被代理/SSRF 保护拦截，需像上面这样手动下载。）
 
 ### 7.5 启动顺序
 
@@ -339,13 +348,16 @@ Java `callVoiceClone` 传参名与 GPT-SoVITS `api_v2.py` 基本一致，但编�
 
 ### 8.7 /tts 返回 400
 
-**现象**：直接调 GPT-SoVITS `/tts` 返回 400。
+**现象**：直接调 GPT-SoVITS `/tts` 返回 400，body 为 `{"message":"tts failed","Exception":"Resource 'cmudict' not found ..."}`（或 `averaged_perceptron_tagger_eng` / `punkt`）。
 
 **常见原因**：
 - `streaming_mode` 传了字符串 `"false"`（api_v2 只认 bool/int，字符串被当 truthy）。
 - 参数名不匹配（如 `sovits_weights_path` vs `sovits_path`）。
+- **缺 NLTK 英文资源**：长文本含英文词时 `cut5` 分词需要 `cmudict`/`averaged_perceptron_tagger_eng`/`punkt`，缺失报 400。
 
-**解决**：编排服务 `voice.tts()` 已做参数清洗——丢弃 `streaming_mode`、`sovits_weights_path`、`gpt_weights_path` 等，权重由 `tts_infer.yaml` 指定（见 §7.7）。
+**解决**：
+- 参数问题：编排服务 `voice.tts()` 已做参数清洗——丢弃 `streaming_mode`、`sovits_weights_path`、`gpt_weights_path` 等，权重由 `tts_infer.yaml` 指定（见 §7.7）。
+- NLTK 资源：安装到 `~/nltk_data/`（见 §7.4）。`nltk.download()` 若被代理/SSRF 保护拦截（`pathsec` CWE-918），需手动从 `https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/` 下载对应 zip 解压。
 
 ### 8.8 CPU 推理太慢
 

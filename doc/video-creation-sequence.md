@@ -182,7 +182,7 @@ sequenceDiagram
 
 - Java：`videoAddCaptions`（service `:1025`）
 - Python：`app.py` 的 `add_captions`（`:264`）→ `services/video.py:add_captions`（`:91`）
-- 动作：Java 按页取 `ppt_image_words` + 每段 `ppt_voice_length` 构建字幕时间轴 `captions=[{text,start,end}]`，Python 生成 **ASS**（`PlayRes 1920x1080`、`Alignment=2` 底部居中、`WrapStyle=0` 单行；超长字幕在 80% 屏宽内横向滚动）用 libass 烧录，输出 `video/{videoId}/{batch}/final.mp4`。
+- 动作：Java 按页取 `ppt_image_words` + 每段 `ppt_voice_length` 构建字幕时间轴 `captions=[{text,start,end}]`，Python 生成 **ASS**（`PlayRes 1920x1080`、`Alignment=2` 底部居中、源文本换行合并为单行；超长字幕在 80% 屏宽内横向滚动）用 libass 烧录，输出 `video/{videoId}/{batch}/final.mp4`。
 - 回调：`updateRecordVideo`（`video_type=5`）→ 写主表 `video_url=final.mp4`，全部步骤完成 → `video_status=4`。
 
 ## 5. 状态机
