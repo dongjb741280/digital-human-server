@@ -243,7 +243,7 @@ python3 -m venv .venv
 
 #### 7.2.4 性能
 
-CPU（Apple Silicon）实测：1.2s 音频约 70s（人脸检测 + 唇形合成，~35s/批次）。短片段可接受，长视频建议 GPU（MuseTalk 或 Wav2Lip GPU 版）。
+CPU（Apple Silicon）实测：44s 音频、720×974 画面整段约数分钟，主要耗时在人脸检测。Wav2Lip 的 `inference.py` 默认对人脸检测降采样 2 倍（`--face_det_resize_factor`，检测框坐标回放到原图、输出分辨率不变），人脸检测提速约 10 倍——未降采样前单段人脸检测（994 帧）就要 ~20 分钟。长视频仍建议 GPU（MuseTalk 或 Wav2Lip GPU 版）。
 
 
 ### 7.3 抠像安装（Apple Silicon / CPU）

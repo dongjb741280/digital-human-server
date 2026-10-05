@@ -134,6 +134,7 @@ sequenceDiagram
 
 - 接口：`POST /digital-api/system/voiceManager/updateVoiceBypython`（controller `:458`，service `:349` `updateVoiceFinall`）
 - 动作：`voice_type=1` 分支写回 `voiceSampleUrl` 和最终 `voiceStatus`。
+- 回调新增 `length` 字段（音频时长，毫秒）：`app.py` 用 `voice.audio_duration_ms()` 解析后一并回传；Java 侧 `resolveVoiceLength` 优先取该值，缺失时再从 MinIO 的 wav 解析兜底。
 
 ## 5. 状态机
 
@@ -248,6 +249,13 @@ cd ~/IdeaProjects/ai-digital/digital-human-engine
 nohup ./.venv/bin/uvicorn app:app --host 127.0.0.1 --port 60013 \
   > /tmp/uvicorn.log 2>&1 &
 ```
+
+> **GPT-SoVITS WebUI 操作页（可选，9874）**：需要手动训练音色、试听、管理模型时另起（自动化链路只用 `api_v2.py`，WebUI 仅供人工操作，两者端口不同可同时运行）：
+>
+> ```bash
+> cd ~/IdeaProjects/ai-digital/GPT-SoVITS
+> ./venv/bin/python webui.py   # 浏览器打开 http://localhost:9874
+> ```
 
 ### 7.6 关键环境变量（`digital-human-engine/config.py`）
 
