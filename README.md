@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://dongjb741280.github.io/digital-human-server/demo/电信政企2026年报.mp4">
-    <img src="https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/电信政企2026年报-poster.jpg" width="320" alt="电信政企2026年报 数字人演示视频">
+    <img src="https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/电信政企2026年报-poster.jpg" width="640" alt="电信政企2026年报 数字人演示视频">
   </a>
 </p>
 

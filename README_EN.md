@@ -8,7 +8,7 @@ A digital human platform backend. Built on [yudao-cloud](https://github.com/Yuna
 
 <p align="center">
   <a href="https://dongjb741280.github.io/digital-human-server/demo/电信政企2026年报.mp4">
-    <img src="https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/电信政企2026年报-poster.jpg" width="320" alt="Digital human demo">
+    <img src="https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/电信政企2026年报-poster.jpg" width="640" alt="Digital human demo">
   </a>
 </p>
 
