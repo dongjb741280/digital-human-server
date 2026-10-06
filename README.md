@@ -13,8 +13,8 @@
 ## 效果演示
 
 <p align="center">
-  <a href="https://dongjb741280.github.io/digital-human-server/demo/digital-human-demo.mp4">
-    <img src="https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/digital-human-demo-poster.jpg" width="320" alt="数字人视频演示">
+  <a href="https://dongjb741280.github.io/digital-human-server/demo/电信政企2026年报.mp4">
+    <img src="https://raw.githubusercontent.com/dongjb741280/digital-human-server/main/site/demo/电信政企2026年报-poster.jpg" width="320" alt="电信政企2026年报 数字人演示视频">
   </a>
 </p>
 
@@ -34,6 +34,15 @@
 | AI 智能体 / 实时互动 | 智能体列表、话术对练、流程编排、数字人实时互动（SSE 流式） |
 
 > 完整的业务流程与部署细节见 [`doc/`](./doc/) 目录下的时序文档。
+
+## 界面预览
+
+| | |
+|---|---|
+| **工作台** — 数字人内容生产总览<br><img src="doc/assets/workspace.png" width="440" alt="工作台"> | **形象复刻** — 上传视频抠像复刻数字分身<br><img src="doc/assets/avatar.png" width="440" alt="形象复刻"> |
+| **声音复刻** — zero-shot 零样本克隆<br><img src="doc/assets/voice.png" width="440" alt="声音复刻"> | **文案制作** — LLM 生成提纲与正文<br><img src="doc/assets/text.png" width="440" alt="文案制作"> |
+| **PPT 制作** — 一键直出原生可编辑 .pptx<br><img src="doc/assets/ppt.png" width="440" alt="PPT 制作"> | **视频制作** — 7 步流水线自动出片<br><img src="doc/assets/video.png" width="440" alt="视频制作"> |
+| **视频管理** — 成片列表 / 播放 / 下载<br><img src="doc/assets/video-mgmt.png" width="440" alt="视频管理"> | |
 
 ## 技术栈
 
