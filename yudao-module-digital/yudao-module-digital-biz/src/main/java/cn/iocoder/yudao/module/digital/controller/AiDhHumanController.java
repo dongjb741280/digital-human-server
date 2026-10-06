@@ -51,7 +51,7 @@ import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUti
 public class AiDhHumanController {
 
     /** 示例视频在 MinIO 中的固定对象键，不依赖 tb_ai_dh_human 记录 */
-    private static final String EXAMPLE_VIDEO_KEY = "asset/example/123.mp4";
+    private static final String EXAMPLE_VIDEO_KEY = "asset/example/电信政企2026年报.mp4";
 
     @Resource
     private AiDhHumanService aiDhHumanService;
