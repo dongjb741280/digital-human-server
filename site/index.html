@@ -26,6 +26,7 @@
         <a href="#workflow">创作流程</a>
         <a href="#scenarios">应用场景</a>
         <a href="#tech">技术优势</a>
+        <a href="#faq">常见问题</a>
         <a class="nav-cta" href="#cta">免费试用</a>
       </nav>
       <button class="nav-toggle" id="navToggle" aria-label="打开菜单" aria-expanded="false">
@@ -256,6 +257,43 @@
       </div>
     </section>
 
+    <!-- 常见问题 -->
+    <section class="section" id="faq">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">常见问题</span>
+          <h2>你可能想问</h2>
+          <p class="section-sub">关于使用、部署与能力的一些常见疑问。</p>
+        </div>
+        <div class="faq">
+          <details class="faq-item">
+            <summary>完全免费吗？</summary>
+            <p>完全免费。项目采用 MIT 开源协议，源码全部托管在 GitHub，可自由使用、修改与二次开发。</p>
+          </details>
+          <details class="faq-item">
+            <summary>需要 GPU 吗？</summary>
+            <p>不强求。CPU 也能跑通完整流水线（Wav2Lip 口型、GPT-SoVITS 语音均支持 CPU，macOS Apple Silicon 已验证），只是速度较慢；配备 GPU 可大幅加速。</p>
+          </details>
+          <details class="faq-item">
+            <summary>支持哪些系统？</summary>
+            <p>服务端支持 Linux 与 macOS；前端为 Web 应用，浏览器即可访问，无需安装客户端。</p>
+          </details>
+          <details class="faq-item">
+            <summary>复刻形象 / 声音需要准备什么？</summary>
+            <p>形象复刻需要一段真人出镜的视频，声音复刻需要一小段清晰人声音频。均为 zero-shot 零样本，无需专门训练。</p>
+          </details>
+          <details class="faq-item">
+            <summary>如何开始部署？</summary>
+            <p>按 README 依次启动 Java 服务、Python 编排服务、GPT-SoVITS 与 Wav2Lip 即可，详细步骤见仓库 doc/ 目录下的时序文档。</p>
+          </details>
+          <details class="faq-item">
+            <summary>能接入我自己的业务吗？</summary>
+            <p>可以。系统提供标准 REST 接口与网关鉴权，各 AI 能力均可被集成到已有业务系统中。</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="section cta" id="cta">
       <div class="container">
@@ -294,6 +332,11 @@
         <h4>资源</h4>
         <a href="https://github.com/dongjb741280/digital-human-server" target="_blank" rel="noopener">GitHub 仓库</a>
         <a href="https://github.com/dongjb741280/digital-human-server/blob/main/README.md" target="_blank" rel="noopener">项目文档</a>
+      </div>
+      <div class="footer-col">
+        <h4>社区</h4>
+        <a href="https://github.com/dongjb741280/digital-human-server/issues" target="_blank" rel="noopener">问题反馈</a>
+        <a href="https://github.com/dongjb741280/digital-human-server" target="_blank" rel="noopener">Star 支持</a>
       </div>
     </div>
     <div class="container footer-bottom">

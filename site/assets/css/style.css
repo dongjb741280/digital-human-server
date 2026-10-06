@@ -239,6 +239,17 @@ img { max-width: 100%; display: block; }
 .tech-item h3::before { content: ""; display: block; width: 28px; height: 3px; border-radius: 2px; background: var(--grad); margin-bottom: 14px; }
 .tech-item p { font-size: 14.5px; color: #a5b4fc; }
 
+/* ---------- 常见问题 ---------- */
+.faq { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.faq-item { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 0 22px; transition: border-color 0.2s, box-shadow 0.2s; }
+.faq-item:hover { border-color: #d8dbf3; }
+.faq-item[open] { box-shadow: var(--shadow-md); }
+.faq-item summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: "+"; font-size: 22px; font-weight: 400; color: var(--brand); transition: transform 0.2s; }
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item p { padding: 0 0 18px; font-size: 14.5px; color: var(--muted); line-height: 1.7; }
+
 /* ---------- CTA ---------- */
 .cta { background: var(--bg-soft); }
 .cta-box {
@@ -253,7 +264,7 @@ img { max-width: 100%; display: block; }
 
 /* ---------- Footer ---------- */
 .footer { background: var(--navy); color: #a5b4fc; padding: 64px 0 28px; }
-.footer-inner { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; padding-bottom: 40px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.footer-inner { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; padding-bottom: 40px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
 .footer-brand .brand { color: #fff; margin-bottom: 16px; }
 .footer-brand p { font-size: 14.5px; max-width: 320px; }
 .footer-col h4 { color: #fff; font-size: 15px; margin-bottom: 16px; }
